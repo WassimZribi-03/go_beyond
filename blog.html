@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog - Création et Gestion</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #16172d;
+            color: #ffffff;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            background-color: #535364;
+            border-radius: 8px;
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        input, textarea, select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: none;
+        }
+        button {
+            background-color: #90909b;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #535364;
+        }
+        .blog {
+            background: #ffffff;
+            color: #000;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .blog h3 {
+            margin: 0 0 10px;
+        }
+        .comments {
+            margin-top: 10px;
+        }
+        .visibility {
+            font-size: 0.9em;
+            color: #535364;
+        }
+        .logo {
+            width: 200px;
+            height: auto;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: white;
+        }
+
+    </style>
+</head>
+<body>
+    <!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog - Création et Gestion</title>
+    <img src="gobeyond.png" alt="Logo" class="logo"> 
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #16172d;
+            color: #ffffff;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            background-color: #535364;
+            border-radius: 8px;
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        input, textarea, select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: none;
+        }
+        button {
+            background-color: #90909b;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #535364;
+        }
+        .blog {
+            background: #ffffff;
+            color: #000;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .blog h3 {
+            margin: 0 0 10px;
+        }
+        .comments {
+            margin-top: 10px;
+        }
+        .visibility {
+            font-size: 0.9em;
+            color: #535364;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Créer un Blog</h1>
+        <form id="blog-form">
+            <input type="text" id="blog-title" placeholder="Titre du blog" required>
+            <textarea id="blog-content" placeholder="Contenu du blog" rows="4" required></textarea>
+            <select id="blog-visibility">
+                <option value="hebergement">hébergement</option>
+                <option value="event">event</option>
+                <option value="guide">guide</option>
+            </select>
+            <button type="submit">Publier</button>
+        </form>
+        
+        <h2>Liste des Blogs</h2>
+        <label for="visibility-filter">FILTER :</label>
+        <select id="visibility-filter">
+            <option value="hebergement">hébergement</option>
+            <option value="event">event</option>
+            <option value="guide">guide</option>
+        </select>
+
+        <div id="blog-list"></div>
+    </div>
+
+    <script>
+        const blogs = JSON.parse(localStorage.getItem('blogs')) || [];
+
+        function saveBlogs() {
+            localStorage.setItem('blogs', JSON.stringify(blogs));
+        }
+
+        function displayBlogs(filter = '') {
+            const blogList = document.getElementById('blog-list');
+            blogList.innerHTML = '';
+            const filteredBlogs = filter ? blogs.filter(blog => blog.visibility === filter) : blogs;
+
+            filteredBlogs.forEach((blog, index) => {
+                const blogDiv = document.createElement('div');
+                blogDiv.className = 'blog';
+                blogDiv.innerHTML = `
+                    <h3>${blog.title}</h3>
+                    <p>${blog.content}</p>
+                    <p><strong>Publié le:</strong> ${blog.date}</p>
+                    <p class="visibility"><strong>Visibilité:</strong> ${blog.visibility === 'public' ? 'Public' : 'Privé'}</p>
+                    <button onclick="deleteBlog(${index})">Supprimer</button>
+                `;
+                blogList.appendChild(blogDiv);
+            });
+        }
+
+        function deleteBlog(index) {
+            blogs.splice(index, 1);
+            saveBlogs();
+            displayBlogs();
+        }
+
+        document.getElementById('blog-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const title = document.getElementById('blog-title').value;
+            const content = document.getElementById('blog-content').value;
+            const visibility = document.getElementById('blog-visibility').value;
+            const date = new Date().toLocaleString();
+
+            blogs.push({ title, content, visibility, date });
+            saveBlogs();
+            displayBlogs();
+
+            document.getElementById('blog-form').reset();
+        });
+
+        document.getElementById('visibility-filter').addEventListener('change', (e) => {
+            const filter = e.target.value;
+            displayBlogs(filter);
+        });
+
+        displayBlogs();
+    </script>
+</body>
+</html>
