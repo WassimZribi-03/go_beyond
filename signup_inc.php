@@ -12,10 +12,11 @@ $Lname = mysqli_real_escape_string($db, $_POST['prenom']);
 $role = mysqli_real_escape_string($db, $_POST['role']);
 $email = mysqli_real_escape_string($db, $_POST['email']);
 $password = mysqli_real_escape_string($db, $_POST['password']);
+$hashedPassword = password_hash($password, PASSWORD_DEFAULT); // Hash the password
 $confirm_password = mysqli_real_escape_string($db, $_POST['confirm-password']);
 
 // Ensure the query string is correct
-$sql = "INSERT INTO users (FisrtName, LastName, Email, Password, Role) VALUES ('$Fname', '$Lname', '$email', '$password', '$role')";
+$sql = "INSERT INTO users (FisrtName, LastName, Email, Password, Role) VALUES ('$Fname', '$Lname', '$email', '$hashedPassword', '$role')";
 
 $result = mysqli_query($db, $sql);
 

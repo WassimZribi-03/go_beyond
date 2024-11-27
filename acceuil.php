@@ -206,11 +206,6 @@
         </div>
     </div>
     <a href="Continuez" class="footer-link">Continuez à explorer</a>
-    <br><br>
 
-    <a href="logout.php"  class="footer-link" >logout</a>
 </body>
 </html>
-
-
-

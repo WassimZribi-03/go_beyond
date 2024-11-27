@@ -18,7 +18,7 @@
             <input type="text" id="nom" name="nom" placeholder="First Name">
             <input type="text" id="prenom" name="prenom" placeholder="Last Name">
             <input type="text" id="username" name="role" placeholder="Role">
-            <input type="email" id="email" name="email" placeholder="Email">
+            <input type="text" id="email" name="email" placeholder="Email">
             <input type="password" id="password" name="password" placeholder="Password">
             <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm your Password">
             <button type="submit">Sign Up</button>
