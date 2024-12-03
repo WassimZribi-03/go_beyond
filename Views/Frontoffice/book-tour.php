@@ -18,7 +18,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $bookingController = new BookingController();
         $bookingController->addBooking($booking);
         
-        $success = "Booking confirmed successfully!";
+        // Redirect to my-bookings.php after successful booking
+        header('Location: my-bookings.php?success=1');
+        exit();
     } catch (Exception $e) {
         $error = $e->getMessage();
     }
@@ -32,117 +34,160 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Book Your Tour</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="css/styles.css">
     <style>
-        .booking-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            padding: 20px;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
         }
 
-        .booking-card {
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
         }
 
-        .booking-card:hover {
-            transform: translateY(-5px);
+        .booking-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            backdrop-filter: blur(10px);
         }
 
-        .booking-content {
-            padding: 20px;
-        }
-
-        .selected-tour {
-            background: linear-gradient(135deg, #6B73FF 0%, #000DFF 100%);
-            color: white;
-            padding: 30px;
-            border-radius: 15px;
-            margin-bottom: 30px;
+        .tour-info {
             text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            color: white;
         }
 
-        .selected-tour h2 {
-            font-size: 2em;
+        .tour-info h2 {
+            font-size: 2.2em;
             margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
         }
 
-        .selected-tour .price {
+        .tour-price {
             font-size: 1.5em;
-            font-weight: bold;
+            font-weight: 600;
+        }
+
+        .form-section {
+            margin-bottom: 35px;
+        }
+
+        .form-section h3 {
+            color: #2d3436;
+            font-size: 1.5em;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            position: relative;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 8px;
-            color: #333;
+            margin-bottom: 10px;
+            color: #2d3436;
             font-weight: 500;
+            font-size: 1.1em;
         }
 
         .form-group input {
             width: 100%;
-            padding: 12px;
+            padding: 15px 20px;
             border: 2px solid #e0e0e0;
-            border-radius: 8px;
+            border-radius: 12px;
+            font-size: 1em;
             transition: all 0.3s ease;
+            background: white;
         }
 
         .form-group input:focus {
-            border-color: #6B73FF;
-            box-shadow: 0 0 10px rgba(107, 115, 255, 0.2);
+            border-color: #667eea;
+            box-shadow: 0 0 15px rgba(102, 126, 234, 0.1);
             outline: none;
+        }
+
+        .form-group i {
+            position: absolute;
+            right: 15px;
+            top: 45px;
+            color: #a0a0a0;
         }
 
         .book-btn {
             width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #6B73FF 0%, #000DFF 100%);
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 1.1em;
+            border-radius: 12px;
+            font-size: 1.2em;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-top: 20px;
         }
 
         .book-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(107, 115, 255, 0.3);
-        }
-
-        .error-message, .success-message {
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.2);
         }
 
         .error-message {
             background: #fee;
             color: #e74c3c;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
             border-left: 4px solid #e74c3c;
         }
 
         .success-message {
-            background: #efe;
-            color: #27ae60;
-            border-left: 4px solid #27ae60;
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+            border-left: 4px solid #2e7d32;
+        }
+
+        .success-message a {
+            display: inline-block;
+            margin-top: 15px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .booking-container {
+                padding: 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Complete Your Booking</h1>
-        
+    <div class="booking-container">
+        <!-- Add navigation -->
+        <div class="navigation" style="margin-bottom: 20px;">
+            <a href="my-bookings.php" style="text-decoration: none; color: #667eea;">
+                <i class="fas fa-arrow-left"></i> View My Bookings
+            </a>
+        </div>
+
         <?php if ($error): ?>
             <div class="error-message">
                 <i class="fas fa-exclamation-circle"></i>
@@ -150,59 +195,59 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
         <?php endif; ?>
         
-        <?php if ($success): ?>
+        <?php if (isset($_GET['success'])): ?>
             <div class="success-message">
                 <i class="fas fa-check-circle"></i>
-                <?php echo htmlspecialchars($success); ?>
+                Booking confirmed successfully!
                 <br>
-                <a href="tours.php" class="back-link">
-                    <i class="fas fa-arrow-left"></i> Return to Tours
+                <a href="my-bookings.php">
+                    <i class="fas fa-list"></i> View My Bookings
+                </a>
+                <br>
+                <a href="tours.php">
+                    <i class="fas fa-arrow-left"></i> Browse More Tours
                 </a>
             </div>
         <?php else: ?>
-            <div class="booking-grid">
-                <div class="booking-card">
-                    <div class="booking-content">
-                        <div id="selectedTourInfo" class="selected-tour"></div>
-                        
-                        <form method="POST" action="" id="bookingForm" onsubmit="return validateForm(event)">
-                            <input type="hidden" id="tourId" name="tourId">
-                            
-                            <div class="form-group">
-                                <label for="fullName">
-                                    <i class="fas fa-user"></i> Full Name
-                                </label>
-                                <input type="text" id="fullName" name="fullName" required>
-                            </div>
+            <div id="selectedTourInfo" class="tour-info"></div>
+            
+            <form method="POST" action="" id="bookingForm" onsubmit="return validateForm(event)">
+                <input type="hidden" id="tourId" name="tourId">
+                
+                <div class="form-section">
+                    <h3><i class="fas fa-user"></i> Personal Information</h3>
+                    <div class="form-group">
+                        <label for="fullName">Full Name *</label>
+                        <input type="text" id="fullName" name="fullName" required>
+                        <i class="fas fa-user"></i>
+                    </div>
 
-                            <div class="form-group">
-                                <label for="email">
-                                    <i class="fas fa-envelope"></i> Email Address
-                                </label>
-                                <input type="email" id="email" name="email" required>
-                            </div>
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" id="email" name="email" required>
+                        <i class="fas fa-envelope"></i>
+                    </div>
 
-                            <div class="form-group">
-                                <label for="phone">
-                                    <i class="fas fa-phone"></i> Phone Number
-                                </label>
-                                <input type="tel" id="phone" name="phone" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="tourDate">
-                                    <i class="fas fa-calendar"></i> Tour Date
-                                </label>
-                                <input type="date" id="tourDate" name="tourDate" required>
-                            </div>
-
-                            <button type="submit" class="book-btn">
-                                <i class="fas fa-check-circle"></i> Confirm Booking
-                            </button>
-                        </form>
+                    <div class="form-group">
+                        <label for="phone">Phone Number *</label>
+                        <input type="tel" id="phone" name="phone" required>
+                        <i class="fas fa-phone"></i>
                     </div>
                 </div>
-            </div>
+
+                <div class="form-section">
+                    <h3><i class="fas fa-calendar"></i> Tour Details</h3>
+                    <div class="form-group">
+                        <label for="tourDate">Tour Date *</label>
+                        <input type="date" id="tourDate" name="tourDate" required>
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                </div>
+
+                <button type="submit" class="book-btn">
+                    <i class="fas fa-check-circle"></i> Confirm Booking
+                </button>
+            </form>
         <?php endif; ?>
     </div>
 
@@ -213,15 +258,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             const tourPrice = sessionStorage.getItem('tourPrice');
             
             if (!tourId || !tourName) {
-                alert('No tour selected. Redirecting to tours page...');
-                window.location.href = 'tours.php';
+                document.getElementById('selectedTourInfo').innerHTML = `
+                    <div class="error-message">
+                        <p>No tour selected. Please select a tour first.</p>
+                        <a href="tours.php" class="btn">Browse Tours</a>
+                    </div>
+                `;
                 return;
             }
 
             document.getElementById('tourId').value = tourId;
             document.getElementById('selectedTourInfo').innerHTML = `
                 <h2>${tourName}</h2>
-                <p class="price">$${tourPrice}</p>
+                <p class="tour-price">$${tourPrice}</p>
             `;
 
             const today = new Date().toISOString().split('T')[0];
@@ -230,25 +279,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         function validateForm(event) {
             event.preventDefault();
-            let isValid = true;
-            const form = document.getElementById('bookingForm');
             
-            // Basic validation
-            const inputs = form.querySelectorAll('input[required]');
-            inputs.forEach(input => {
-                if (!input.value.trim()) {
-                    isValid = false;
-                    input.classList.add('error');
-                } else {
-                    input.classList.remove('error');
-                }
-            });
+            // Add form validation here
+            const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const tourDate = document.getElementById('tourDate').value;
 
-            if (isValid) {
-                form.submit();
+            if (fullName.length < 3) {
+                alert('Please enter a valid name (minimum 3 characters)');
+                return false;
             }
-            
-            return false;
+
+            if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+                alert('Please enter a valid email address');
+                return false;
+            }
+
+            if (!phone.match(/^\+?[\d\s-]{8,}$/)) {
+                alert('Please enter a valid phone number');
+                return false;
+            }
+
+            if (!tourDate) {
+                alert('Please select a tour date');
+                return false;
+            }
+
+            document.getElementById('bookingForm').submit();
+            return true;
         }
     </script>
 </body>
