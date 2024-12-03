@@ -129,5 +129,60 @@ class TourController
             echo "Error: " . $e->getMessage(); 
         }
     }
+
+    public function getFilteredTours($destination = '', $minPrice = '', $maxPrice = '', $duration = '') {
+        try {
+            $db = config::getConnexion();
+            $query = "SELECT * FROM tours WHERE 1=1";
+            $params = [];
+
+            if (!empty($destination)) {
+                $query .= " AND destination LIKE :destination";
+                $params['destination'] = "%$destination%";
+            }
+
+            if (!empty($minPrice)) {
+                $query .= " AND price >= :min_price";
+                $params['min_price'] = $minPrice;
+            }
+
+            if (!empty($maxPrice)) {
+                $query .= " AND price <= :max_price";
+                $params['max_price'] = $maxPrice;
+            }
+
+            if (!empty($duration)) {
+                $query .= " AND duration = :duration";
+                $params['duration'] = $duration;
+            }
+
+            $stmt = $db->prepare($query);
+            $stmt->execute($params);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log("Filter error: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    public function getTourById($id) {
+        try {
+            $db = config::getConnexion();
+            $query = "SELECT * FROM tours WHERE id = :id";
+            $stmt = $db->prepare($query);
+            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+            $stmt->execute();
+            
+            $tour = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$tour) {
+                throw new Exception("Tour not found");
+            }
+            
+            return $tour;
+        } catch (Exception $e) {
+            throw new Exception("Error fetching tour: " . $e->getMessage());
+        }
+    }
 }
 ?>

@@ -5,13 +5,22 @@ if (!class_exists('Booking')) {
         private ?int $tour_id;
         private ?string $customer_name;
         private ?string $customer_email;
+        private ?string $customer_phone;
         private ?DateTime $booking_date;
 
-        public function __construct(?int $id, ?int $tour_id, ?string $customer_name, ?string $customer_email, ?DateTime $booking_date) {
+        public function __construct(
+            ?int $id = null,
+            ?int $tour_id = null,
+            ?string $customer_name = null,
+            ?string $customer_email = null,
+            ?string $customer_phone = null,
+            ?DateTime $booking_date = null
+        ) {
             $this->id = $id;
             $this->tour_id = $tour_id;
             $this->customer_name = $customer_name;
             $this->customer_email = $customer_email;
+            $this->customer_phone = $customer_phone;
             $this->booking_date = $booking_date;
         }
 
@@ -46,6 +55,14 @@ if (!class_exists('Booking')) {
 
         public function setCustomerEmail(?string $customer_email): void {
             $this->customer_email = $customer_email;
+        }
+
+        public function getCustomerPhone(): ?string {
+            return $this->customer_phone;
+        }
+
+        public function setCustomerPhone(?string $customer_phone): void {
+            $this->customer_phone = $customer_phone;
         }
 
         public function getBookingDate(): ?DateTime {

@@ -7,14 +7,23 @@ if (!class_exists('Tour')) {
         private ?int $duration;
         private ?float $price;
         private ?string $description;
+        private $db;
 
-        public function __construct(?int $id, ?string $name, ?string $destination, ?int $duration, ?float $price, ?string $description) {
+        public function __construct(
+            ?int $id = null, 
+            ?string $name = null, 
+            ?string $destination = null, 
+            ?int $duration = null, 
+            ?float $price = null, 
+            ?string $description = null
+        ) {
             $this->id = $id;
             $this->name = $name;
             $this->destination = $destination;
             $this->duration = $duration;
             $this->price = $price;
             $this->description = $description;
+            $this->db = config::getConnexion();
         }
 
         // Getters and Setters
@@ -64,6 +73,21 @@ if (!class_exists('Tour')) {
 
         public function setDescription(?string $description): void {
             $this->description = $description;
+        }
+
+        public function getTourById($id) {
+            try {
+                $query = "SELECT * FROM tours WHERE id = :id";
+                $stmt = $this->db->prepare($query);
+                $stmt->execute(['id' => $id]);
+                return $stmt->fetch();
+            } catch (Exception $e) {
+                throw $e;
+            }
+        }
+
+        public function getDb() {
+            return $this->db;
         }
     }
 }
