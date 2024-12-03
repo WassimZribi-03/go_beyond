@@ -5,10 +5,11 @@ include_once '../../Controllers/BookingController.php';
 $tourController = new TourController();
 $bookingController = new BookingController();
 
-$tours = $tourController->listTours();
-$bookings = $bookingController->listBookings();
+// Use the new joined query for bookings
+$bookingsWithTours = $bookingController->listBookingsWithTours();
 
-// Get tour statistics
+// Get tour statistics with the existing method
+$tours = $tourController->listTours();
 $totalTours = $tours ? $tours->rowCount() : 0;
 $totalValue = 0;
 $averagePrice = 0;
@@ -24,23 +25,18 @@ if ($totalTours > 0) {
 }
 
 // Get booking statistics
-$totalBookings = $bookings ? $bookings->rowCount() : 0;
+$totalBookings = count($bookingsWithTours);
 $todayBookings = 0;
-$recentBookings = [];
 
-if ($totalBookings > 0) {
-    while ($booking = $bookings->fetch(PDO::FETCH_ASSOC)) {
-        // Count today's bookings
-        if (date('Y-m-d') === $booking['booking_date']) {
-            $todayBookings++;
-        }
-        // Store for recent bookings display
-        $recentBookings[] = $booking;
+// Count today's bookings
+foreach ($bookingsWithTours as $booking) {
+    if (date('Y-m-d') === $booking['booking_date']) {
+        $todayBookings++;
     }
 }
 
 // Get only the 5 most recent bookings
-$recentBookings = array_slice($recentBookings, 0, 5);
+$recentBookings = array_slice($bookingsWithTours, 0, 5);
 ?>
 
 <!DOCTYPE html>
@@ -151,11 +147,11 @@ $recentBookings = array_slice($recentBookings, 0, 5);
             </div>
             <div class="stat-card">
                 <h3>Total Value</h3>
-                <div class="stat-value">$<?php echo number_format($totalValue, 2); ?></div>
+                <div class="stat-value"><?php echo number_format($totalValue, 2); ?> DT</div>
             </div>
             <div class="stat-card">
                 <h3>Average Price</h3>
-                <div class="stat-value">$<?php echo number_format($averagePrice, 2); ?></div>
+                <div class="stat-value"><?php echo number_format($averagePrice, 2); ?> DT</div>
             </div>
             <div class="stat-card">
                 <h3>Total Bookings</h3>
@@ -195,7 +191,7 @@ $recentBookings = array_slice($recentBookings, 0, 5);
                                 <td><?php echo htmlspecialchars($tour['name']); ?></td>
                                 <td><?php echo htmlspecialchars($tour['destination']); ?></td>
                                 <td><?php echo htmlspecialchars($tour['duration']); ?> days</td>
-                                <td>$<?php echo htmlspecialchars($tour['price']); ?></td>
+                                <td><?php echo htmlspecialchars($tour['price']); ?> DT</td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -210,23 +206,31 @@ $recentBookings = array_slice($recentBookings, 0, 5);
                 <h2>Recent Bookings</h2>
                 <a href="bookings-list.php" class="view-all">View All Bookings</a>
             </div>
-            <?php if (!empty($recentBookings)): ?>
+            <?php if (!empty($bookingsWithTours)): ?>
                 <table>
                     <thead>
                         <tr>
                             <th>Customer Name</th>
                             <th>Tour</th>
+                            <th>Destination</th>
+                            <th>Price</th>
+                            <th>Duration</th>
                             <th>Booking Date</th>
                             <th>Email</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($recentBookings as $booking): 
-                            $tour = $tourController->showTour($booking['tour_id']);
+                        <?php 
+                        // Take only the 5 most recent bookings
+                        $recentBookings = array_slice($bookingsWithTours, 0, 5);
+                        foreach ($recentBookings as $booking): 
                         ?>
                             <tr>
                                 <td><?php echo htmlspecialchars($booking['customer_name']); ?></td>
-                                <td><?php echo htmlspecialchars($tour['name'] ?? 'Unknown Tour'); ?></td>
+                                <td><?php echo htmlspecialchars($booking['tour_name']); ?></td>
+                                <td><?php echo htmlspecialchars($booking['destination']); ?></td>
+                                <td><?php echo htmlspecialchars($booking['tour_price']); ?> DT</td>
+                                <td><?php echo htmlspecialchars($booking['duration']); ?> days</td>
                                 <td><?php echo htmlspecialchars($booking['booking_date']); ?></td>
                                 <td><?php echo htmlspecialchars($booking['customer_email']); ?></td>
                             </tr>

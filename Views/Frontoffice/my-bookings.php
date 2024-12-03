@@ -18,151 +18,189 @@ $bookings = $bookingController->listBookingsWithTours();
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            background-color: #f5f5f5;
-            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
         }
 
         h1 {
-            color: #333;
-            margin-bottom: 30px;
             text-align: center;
+            color: #2d3436;
+            margin-bottom: 40px;
             font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
 
         .bookings-list {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
+            gap: 30px;
         }
 
         .booking-card {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            overflow: hidden;
-            transition: transform 0.3s ease;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            backdrop-filter: blur(10px);
         }
 
         .booking-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
         }
 
         .booking-header {
-            background: linear-gradient(135deg, #6B73FF 0%, #000DFF 100%);
-            color: white;
-            padding: 20px;
-            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
         }
 
         .booking-header h3 {
-            margin: 0;
-            font-size: 1.4em;
-            margin-bottom: 10px;
+            font-size: 1.5em;
+            color: #2d3436;
+            font-weight: 600;
         }
 
         .price {
-            font-size: 1.2em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 8px 15px;
+            border-radius: 25px;
+            color: white;
             font-weight: bold;
-            color: #fff;
-            background: rgba(255,255,255,0.2);
-            padding: 5px 10px;
-            border-radius: 5px;
-            display: inline-block;
+            font-size: 1.2em;
         }
 
         .booking-details {
-            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
         }
 
-        .booking-details p {
-            margin: 10px 0;
-            color: #666;
+        .detail-item {
             display: flex;
             align-items: center;
             gap: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
         }
 
-        .booking-details strong {
-            color: #333;
-            min-width: 100px;
+        .detail-item i {
+            font-size: 1.2em;
+            color: #667eea;
+            width: 24px;
         }
 
-        .booking-details i {
-            color: #6B73FF;
-            width: 20px;
+        .detail-label {
+            font-weight: 600;
+            color: #2d3436;
+            margin-right: 8px;
+        }
+
+        .detail-value {
+            color: #636e72;
         }
 
         .no-bookings {
             text-align: center;
             padding: 50px;
             background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .no-bookings h2 {
+            color: #2d3436;
+            margin-bottom: 15px;
         }
 
         .no-bookings p {
-            color: #666;
-            margin-bottom: 20px;
-        }
-
-        .cta-button {
-            display: inline-block;
-            padding: 12px 25px;
-            background: linear-gradient(135deg, #6B73FF 0%, #000DFF 100%);
-            color: white;
-            text-decoration: none;
-            border-radius: 25px;
-            transition: transform 0.3s ease;
-        }
-
-        .cta-button:hover {
-            transform: translateY(-2px);
+            color: #636e72;
+            font-size: 1.1em;
         }
 
         @media (max-width: 768px) {
-            .bookings-list {
+            .booking-details {
                 grid-template-columns: 1fr;
+            }
+            
+            .booking-header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>My Bookings</h1>
+        <h1>My Travel Bookings</h1>
         
-        <?php if ($bookings && $bookings->rowCount() > 0): ?>
+        <?php if (!empty($bookings)): ?>
             <div class="bookings-list">
-                <?php while($booking = $bookings->fetch()): ?>
+                <?php foreach($bookings as $booking): ?>
                     <div class="booking-card">
                         <div class="booking-header">
                             <h3><?php echo htmlspecialchars($booking['tour_name']); ?></h3>
-                            <p class="price">$<?php echo htmlspecialchars($booking['tour_price']); ?></p>
+                            <span class="price"><?php echo htmlspecialchars($booking['tour_price']); ?> DT</span>
                         </div>
                         <div class="booking-details">
-                            <p><i class="fas fa-map-marker-alt"></i><strong>Destination:</strong> <?php echo htmlspecialchars($booking['destination']); ?></p>
-                            <p><i class="fas fa-clock"></i><strong>Duration:</strong> <?php echo htmlspecialchars($booking['duration']); ?> days</p>
-                            <p><i class="fas fa-user"></i><strong>Customer:</strong> <?php echo htmlspecialchars($booking['customer_name']); ?></p>
-                            <p><i class="fas fa-envelope"></i><strong>Email:</strong> <?php echo htmlspecialchars($booking['customer_email']); ?></p>
-                            <p><i class="fas fa-calendar"></i><strong>Booking Date:</strong> <?php echo date('F j, Y', strtotime($booking['booking_date'])); ?></p>
+                            <div class="detail-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <div>
+                                    <span class="detail-label">Destination:</span>
+                                    <span class="detail-value"><?php echo htmlspecialchars($booking['destination']); ?></span>
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-clock"></i>
+                                <div>
+                                    <span class="detail-label">Duration:</span>
+                                    <span class="detail-value"><?php echo htmlspecialchars($booking['duration']); ?> days</span>
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-user"></i>
+                                <div>
+                                    <span class="detail-label">Customer:</span>
+                                    <span class="detail-value"><?php echo htmlspecialchars($booking['customer_name']); ?></span>
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-envelope"></i>
+                                <div>
+                                    <span class="detail-label">Email:</span>
+                                    <span class="detail-value"><?php echo htmlspecialchars($booking['customer_email']); ?></span>
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-calendar"></i>
+                                <div>
+                                    <span class="detail-label">Booking Date:</span>
+                                    <span class="detail-value"><?php echo htmlspecialchars($booking['booking_date']); ?></span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                <?php endwhile; ?>
+                <?php endforeach; ?>
             </div>
         <?php else: ?>
             <div class="no-bookings">
-                <p>You haven't made any bookings yet.</p>
-                <a href="tours.php" class="cta-button">Browse Available Tours</a>
+                <h2>No Bookings Found</h2>
+                <p>You haven't made any travel bookings yet. Start planning your next adventure!</p>
             </div>
         <?php endif; ?>
     </div>

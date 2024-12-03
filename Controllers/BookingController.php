@@ -7,20 +7,29 @@ class BookingController
     // List all bookings with tour information
     public function listBookingsWithTours()
     {
-        $sql = "SELECT b.*, 
-                       t.name as tour_name, 
-                       t.price as tour_price,
-                       t.destination,
-                       t.duration
-                FROM bookings b 
-                JOIN tours t ON b.tour_id = t.id
-                ORDER BY b.booking_date DESC";
-                
-        $db = config::getConnexion();
         try {
-            return $db->query($sql);
-        } catch (Exception $e) {
-            die('Error:' . $e->getMessage());
+            $db = config::getConnexion();
+            
+            $query = $db->prepare("
+                SELECT 
+                    bookings.*,
+                    tours.name AS tour_name,
+                    tours.price AS tour_price, 
+                    tours.destination,
+                    tours.duration
+                FROM bookings
+                INNER JOIN tours 
+                    ON bookings.tour_id = tours.id
+                ORDER BY bookings.booking_date DESC
+            ");
+
+            $query->execute();
+            return $query->fetchAll(PDO::FETCH_ASSOC);
+
+        } catch (PDOException $e) {
+            // Log error and return empty array instead of dying
+            error_log("Database error: " . $e->getMessage());
+            return [];
         }
     }
 

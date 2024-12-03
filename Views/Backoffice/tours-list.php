@@ -66,7 +66,7 @@ $tours = $tourController->listTours();
                             <td><?php echo htmlspecialchars($tour['name']); ?></td>
                             <td><?php echo htmlspecialchars($tour['destination']); ?></td>
                             <td><?php echo htmlspecialchars($tour['duration']); ?> days</td>
-                            <td>$<?php echo htmlspecialchars($tour['price']); ?></td>
+                            <td><?php echo htmlspecialchars($tour['price']); ?> DT</td>
                             <td><?php echo htmlspecialchars($tour['description']); ?></td>
                             <td>
                                 <a href="update-tour.php?id=<?php echo $tour['id']; ?>" class="btn btn-edit">Edit</a>

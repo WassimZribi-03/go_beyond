@@ -18,9 +18,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $bookingController = new BookingController();
         $bookingController->addBooking($booking);
         
-        // Redirect to my-bookings.php after successful booking
-        header('Location: my-bookings.php?success=1');
-        exit();
+        // Set success flag and stay on the same page
+        $success = true;
     } catch (Exception $e) {
         $error = $e->getMessage();
     }
@@ -181,13 +180,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </head>
 <body>
     <div class="booking-container">
-        <!-- Add navigation -->
-        <div class="navigation" style="margin-bottom: 20px;">
-            <a href="my-bookings.php" style="text-decoration: none; color: #667eea;">
-                <i class="fas fa-arrow-left"></i> View My Bookings
-            </a>
-        </div>
-
         <?php if ($error): ?>
             <div class="error-message">
                 <i class="fas fa-exclamation-circle"></i>
@@ -195,18 +187,41 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
         <?php endif; ?>
         
-        <?php if (isset($_GET['success'])): ?>
+        <?php if ($success): ?>
             <div class="success-message">
-                <i class="fas fa-check-circle"></i>
-                Booking confirmed successfully!
-                <br>
-                <a href="my-bookings.php">
-                    <i class="fas fa-list"></i> View My Bookings
-                </a>
-                <br>
-                <a href="tours.php">
-                    <i class="fas fa-arrow-left"></i> Browse More Tours
-                </a>
+                <i class="fas fa-check-circle" style="font-size: 3em; color: #2e7d32; margin-bottom: 20px;"></i>
+                <h2 style="color: #2e7d32; margin-bottom: 15px;">Booking Confirmed Successfully!</h2>
+                <p style="margin-bottom: 25px;">Thank you for booking with us. Your tour has been confirmed.</p>
+                <div class="action-buttons" style="display: flex; gap: 15px; justify-content: center;">
+                    <a href="my-bookings.php" class="action-btn" style="
+                        background: #2e7d32;
+                        color: white;
+                        padding: 12px 25px;
+                        border-radius: 8px;
+                        text-decoration: none;
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 8px;
+                        transition: all 0.3s ease;
+                    ">
+                        <i class="fas fa-list"></i>
+                        View My Bookings
+                    </a>
+                    <a href="tours.php" class="action-btn" style="
+                        background: #667eea;
+                        color: white;
+                        padding: 12px 25px;
+                        border-radius: 8px;
+                        text-decoration: none;
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 8px;
+                        transition: all 0.3s ease;
+                    ">
+                        <i class="fas fa-search"></i>
+                        Browse More Tours
+                    </a>
+                </div>
             </div>
         <?php else: ?>
             <div id="selectedTourInfo" class="tour-info"></div>
@@ -270,7 +285,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             document.getElementById('tourId').value = tourId;
             document.getElementById('selectedTourInfo').innerHTML = `
                 <h2>${tourName}</h2>
-                <p class="tour-price">$${tourPrice}</p>
+                <p class="tour-price">${tourPrice} DT</p>
             `;
 
             const today = new Date().toISOString().split('T')[0];

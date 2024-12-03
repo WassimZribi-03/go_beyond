@@ -116,7 +116,7 @@ $tours = $tourController->listTours();
 </head>
 <body>
     <div class="container">
-        <h1>Discover Amazing Tours</h1>
+        <h1>Discover Our Tours</h1>
         <div class="tours-grid">
             <?php while ($tour = $tours->fetch(PDO::FETCH_ASSOC)) : ?>
                 <div class="tour-card">
@@ -132,7 +132,7 @@ $tours = $tourController->listTours();
                                 <strong>Duration:</strong> <?php echo htmlspecialchars($tour['duration']); ?> days
                             </p>
                         </div>
-                        <p class="price">$<?php echo htmlspecialchars($tour['price']); ?></p>
+                        <div class="price"><?php echo htmlspecialchars($tour['price']); ?> DT</div>
                         <p class="description"><?php echo htmlspecialchars($tour['description']); ?></p>
                         <button class="book-btn" onclick="bookTour(<?php echo $tour['id']; ?>, '<?php echo htmlspecialchars($tour['name']); ?>', <?php echo $tour['price']; ?>)">
                             Book Now
@@ -148,7 +148,7 @@ $tours = $tourController->listTours();
             // Store tour info in sessionStorage
             sessionStorage.setItem('selectedTourId', tourId);
             sessionStorage.setItem('selectedTourName', tourName);
-            sessionStorage.setItem('tourPrice', tourPrice);
+            sessionStorage.setItem('tourPrice', `${tourPrice} DT`);
             // Redirect to booking page
             window.location.href = 'book-tour.php';
         }

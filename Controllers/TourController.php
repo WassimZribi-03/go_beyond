@@ -4,6 +4,31 @@ include(__DIR__ . '/../Models/Tour.php');
 
 class TourController
 {
+    // List all tours with booking count
+    public function listToursWithBookings()
+    {
+        try {
+            $db = config::getConnexion();
+            
+            $query = $db->prepare("
+                SELECT 
+                    tours.*,
+                    COUNT(bookings.id) as booking_count
+                FROM tours
+                LEFT JOIN bookings ON tours.id = bookings.tour_id
+                GROUP BY tours.id
+                ORDER BY tours.name ASC
+            ");
+
+            $query->execute();
+            return $query->fetchAll(PDO::FETCH_ASSOC);
+
+        } catch (PDOException $e) {
+            error_log("Database error: " . $e->getMessage());
+            return [];
+        }
+    }
+
     // List all tours
     public function listTours()
     {
@@ -56,15 +81,21 @@ class TourController
     // Delete a tour by ID
     public function deleteTour($id)
     {
-        $sql = "DELETE FROM tours WHERE id = :id";
-        $db = config::getConnexion();
-        $req = $db->prepare($sql);
-        $req->bindValue(':id', $id);
-
         try {
-            $req->execute();
-        } catch (Exception $e) {
-            die('Error: ' . $e->getMessage());
+            $db = config::getConnexion();
+            
+            // First, delete all bookings associated with this tour
+            $deleteBookingsQuery = $db->prepare('DELETE FROM bookings WHERE tour_id = :id');
+            $deleteBookingsQuery->execute(['id' => $id]);
+            
+            // Then delete the tour
+            $deleteTourQuery = $db->prepare('DELETE FROM tours WHERE id = :id');
+            $deleteTourQuery->execute(['id' => $id]);
+            
+            return true;
+        } catch (PDOException $e) {
+            echo "Error: " . $e->getMessage();
+            return false;
         }
     }
 
