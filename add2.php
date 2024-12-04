@@ -4,158 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Event Management</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #fafafa;
-        }
-        .container {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin: 50px;
-        }
-        .card {
-            position: relative;
-            width: 200px;
-            height: 150px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            text-align: center;
-            padding: 20px;
-            background-color: #fff;
-            transition: box-shadow 0.3s;
-            cursor: pointer;
-        }
-        .card:hover {
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-        .buttons {
-            position: absolute;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: none;
-            gap: 10px;
-        }
-        .card:hover .buttons {
-            display: flex;
-        }
-        .btn {
-            padding: 5px 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .btn-delete {
-            background-color: #e74c3c;
-            color: #fff;
-        }
-        .btn-add {
-            background-color: #2ecc71;
-            color: #fff;
-        }
-        .modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 350px;
-            background-color: #fff;
-            padding: 20px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
-            display: none;
-            z-index: 1000;
-        }
-        .modal.active {
-            display: block;
-        }
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: none;
-            z-index: 999;
-        }
-        .overlay.active {
-            display: block;
-        }
-        .modal h3 {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #262626;
-        }
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            margin-bottom: 5px;
-            font-size: 14px;
-            color: #8e8e8e;
-        }
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            padding: 10px;
-            font-size: 14px;
-            border: 1px solid #dbdbdb;
-            border-radius: 5px;
-            background-color: #fafafa;
-        }
-        .form-group textarea {
-            resize: vertical;
-        }
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #b2b2b2;
-        }
-        .btn-submit {
-            width: 100%;
-            padding: 10px;
-            font-size: 16px;
-            background-color: #3897f0;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        .btn-submit:hover {
-            background-color: #3182d8;
-        }
-        .btn-cancel {
-            width: 100%;
-            padding: 10px;
-            font-size: 16px;
-            background-color: #e74c3c;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        .btn-cancel:hover {
-            background-color: #d6452f;
-        }
-        .list-container {
-            display: none; /* Initially hide the lists */
-        }
-        .list-container.active {
-            display: block; /* Show the list when active */
-        }
-    </style>
+    <link rel="stylesheet" href="add2_css.css"> <!-- Link to the CSS file -->
 </head>
 <body>
+
+<?php
+require_once "connect.php"; // Include your database connection
+
+if (isset($db)) {
+    echo "Connection established.";
+} else {
+    echo "Connection not established.";
+}
+
+// Check database connection
+if ($db->connect_error) {
+    die("Connection failed: " . $db->connect_error);
+}
+
+// Function to fetch members from the database
+function fetchMembers($db) {
+    $sql = "SELECT FirstName, LastName, Email FROM users"; // Adjust the query based on your table structure
+    $result = $db->query($sql);
+
+    // Check if the query was successful
+    if (!$result) {
+        die("Query failed: " . $db->error);
+    }
+
+    if ($result->num_rows > 0) {
+        // Output data of each row
+        while ($row = $result->fetch_assoc()) {
+            echo '<div class="list-item">';
+            echo '<span class="member-name">' . htmlspecialchars($row['FirstName']) . ' ' . htmlspecialchars($row['LastName']) . '</span>';
+            echo '<span class="member-email">' . htmlspecialchars($row['Email']) . '</span>';
+            echo '<button class="btn btn-delete" onclick="deleteMember(\'' . htmlspecialchars($row['Email']) . '\')">Delete</button>'; // Pass the email for deletion
+            echo '</div>';
+        }
+    } else {
+        echo '<div class="list-item">No members found</div>';
+    }
+}
+?>
 
 <div class="container">
     <div class="card" id="card-event">
@@ -179,10 +69,19 @@
             <button class="btn btn-add" onclick="openModal('add', 'accommodation'); event.stopPropagation();">Add</button>
         </div>
     </div>
-    <div class="card" id="card-members">
-        <h3 onclick="toggleList('members')">Members</h3>
+    <div class="card" id="card-members" onclick="fetchAndDisplayMembers()">
+        <h3>Members</h3>
     </div>
 </div>
+<!-- search bar  -->
+<br>
+<div class="search-container">
+        <form action="search.php" method="POST">
+            <input type="text" name="keyword" class="searchTerm" placeholder="Search here...">
+            <button type="submit" class="searchButton">Search</button>
+        </form>
+    </div>
+<br>
 
 <!-- Lists -->
 <div class="list-container" id="list-event">
@@ -200,13 +99,9 @@
     <div class="list-item">Accommodation 2</div>
 </div>
 
-<div class="list-container" id="list-members">
-    <div class="list-item">
-        John Doe (admin) <button class="btn btn-delete" onclick="deleteMember('John Doe')">Delete</button>
-    </div>
-    <div class="list-item">
-        Jane Smith (user) <button class="btn btn-delete" onclick="deleteMember('Jane Smith')">Delete</button>
-    </div>
+
+<div class="list-container" id="list-members" style="display: none;">
+    <!-- Member details will be displayed here -->
 </div>
 
 <!-- Modal -->
@@ -225,7 +120,27 @@
         const list = document.getElementById(`list-${type}`);
         const isActive = list.classList.contains('active');
         document.querySelectorAll('.list-container').forEach(el => el.classList.remove('active'));
+        
         if (!isActive) list.classList.add('active');
+    }
+
+    function fetchAndDisplayMembers() {
+        const list = document.getElementById('list-members');
+        if (list.style.display === "none") {
+            list.style.display = "block"; // Show the list
+            fetchMembers(); // Call the function to fetch members
+        } else {
+            list.style.display = "none"; // Hide the list
+        }
+    }
+
+    function fetchMembers() {
+        fetch('fetch_members.php') // Create a separate PHP file to handle fetching
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('list-members').innerHTML = data;
+            })
+            .catch(error => console.error('Error fetching members:', error));
     }
 
     function openModal(action, type) {
@@ -237,8 +152,8 @@
         modalTitle.textContent = `${action === 'delete' ? 'Delete' : 'Add'} ${type}`;
         formContent.innerHTML = action === 'delete'
             ? `<div class="form-group">
-                   <label for="id">Enter ${type} ID:</label>
-                   <input type="text" name="id" id="id" required>
+                   <label for="email">Enter Email:</label>
+                   <input type="text" name="email" id="email" required>
                </div>`
             : generateAddForm(type);
 
@@ -252,100 +167,65 @@
     }
 
     function generateAddForm(type) {
-        if (type === 'event') {
-            return `
-                <div class="form-group">
-                    <label for="eventId">Event ID:</label>
-                    <input type="text" name="eventId" id="eventId" required>
-                </div>
-                <div class="form-group">
-                    <label for="eventDate">Date:</label>
-                    <input type="date" name="eventDate" id="eventDate" required>
-                </div>
-                <div class="form-group">
-                    <label for="eventLocation">Location:</label>
-                    <input type="text" name="eventLocation" id="eventLocation" required>
-                </div>
-                <div class="form-group">
-                    <label for="eventPrice">Price:</label>
-                    <input type="number" name="eventPrice" id="eventPrice" required>
-                </div>
-                <div class="form-group">
-                    <label for="eventOrganizer">Organizer's Email:</label>
-                    <input type="email" name="eventOrganizer" id="eventOrganizer" required>
-                </div>
-                <div class="form-group">
-                    <label for="eventDetails">Details:</label>
-                    <textarea name="eventDetails" id="eventDetails" rows="4"></textarea>
-                </div>
-            `;
-        } else if (type === 'guide') {
-            return `
-                <div class="form-group">
-                    <label for="guideFirstName">First Name:</label>
-                    <input type="text" name="guideFirstName" id="guideFirstName" required>
-                </div>
-                <div class="form-group">
-                    <label for="guideLastName">Last Name:</label>
-                    <input type="text" name="guideLastName" id="guideLastName" required>
-                </div>
-                <div class="form-group">
-                    <label for="guideEmail">Email:</label>
-                    <input type="email" name="guideEmail" id="guideEmail" required>
-                </div>
-                <div class="form-group">
-                    <label for="guidePhone">Phone Number:</label>
-                    <input type="text" name="guidePhone" id="guidePhone" required>
-                </div>
-                <div class="form-group">
-                    <label for="guideAge">Age:</label>
-                    <input type="number" name="guideAge" id="guideAge" required>
-                </div>
-                <div class="form-group">
-                    <label for="guideLocation">Location:</label>
-                    <input type="text" name="guideLocation" id="guideLocation" required>
-                </div>
-                <div class="form-group">
-                    <label for="guideCharge">Charge Per Hour:</label>
-                    <input type="number" name="guideCharge" id="guideCharge" required>
-                </div>
-            `;
-        } else if (type === 'accommodation') {
-            return `
-                <div class="form-group">
-                    <label for="accommodationType">Accommodation Type:</label>
-                    <select name="accommodationType" id="accommodationType" required>
-                        <option value="BnB">BnB</option>
-                        <option value="Hotel">Hotel</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="accommodationPrice">Price Per Night:</label>
-                    <input type="number" name="accommodationPrice" id="accommodationPrice" required>
-                </div>
-                <div class="form-group">
-                    <label for="accommodationBeds">Number of Beds:</label>
-                    <input type="number" name="accommodationBeds" id="accommodationBeds" required>
-                </div>
-                <div class="form-group">
-                    <label for="accommodationOwnerPhone">Owner's Phone Number:</label>
-                    <input type="text" name="accommodationOwnerPhone" id="accommodationOwnerPhone" required>
-                </div>
-                <div class="form-group">
-                    <label for="accommodationOwnerName">Owner's Name:</label>
-                    <input type="text" name="accommodationOwnerName" id="accommodationOwnerName" required>
-                </div>
-                <div class="form-group">
-                    <label for="accommodationDetails">Details:</label>
-                    <textarea name="accommodationDetails" id="accommodationDetails" rows="4"></textarea>
-                </div>
-            `;
+        // Add form generation logic here based on type
+    }
+
+    function deleteMember(email) {
+        if (confirm(`Are you sure you want to delete the member with email: ${email}?`)) {
+            fetch('delete_member.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email: email }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Member deleted successfully.");
+                    fetchAndDisplayMembers(); // Refresh the list
+                } else {
+                    alert("Error deleting member: " + data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
         }
     }
 
-    function deleteMember(member) {
-        alert(`Deleted ${member}`);
+
+    function deleteMember(email) {
+        if (confirm(`Are you sure you want to delete the member with email: ${email}?`)) {
+            // Redirect to delete_member.php with the email as a query parameter
+            window.location.href = `delete_member.php?email=${encodeURIComponent(email)}`;
+        }
     }
+
+
+    function searchMembers() {
+    const keyword = document.getElementById('searchInput').value;
+
+    // Only proceed if the input is not empty
+    if (keyword.length === 0) {
+        document.getElementById('list-members').innerHTML = ''; // Clear the list if input is empty
+        document.getElementById('list-members').style.display = 'none'; // Hide the list
+        return;
+    }
+
+    fetch('search.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `keyword=${encodeURIComponent(keyword)}`
+    })
+    .then(response => response.text())
+    .then(data => {
+        document.getElementById('list-members').innerHTML = data; // Update the member list with the search results
+        document.getElementById('list-members').style.display = 'block'; // Show the list
+    })
+    .catch(error => console.error('Error fetching members:', error));
+}
+
 </script>
 
 </body>
