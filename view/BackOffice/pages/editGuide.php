@@ -12,24 +12,22 @@ $guide= null;
 $guideC = new GuideTouristiqueController();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+  // Sanitize inputs
+  $title = filter_var($_POST['title'], FILTER_SANITIZE_STRING);
+  $description = filter_var($_POST['description'], FILTER_SANITIZE_STRING);
+  $language = filter_var($_POST['language'], FILTER_SANITIZE_STRING);
+  $price = filter_var($_POST['price'], FILTER_VALIDATE_FLOAT);
+  $category = filter_var($_POST['category'], FILTER_SANITIZE_STRING);
+  $region = filter_var($_POST['region'], FILTER_SANITIZE_STRING);
+  $country = filter_var($_POST['country'], FILTER_SANITIZE_STRING);
 
-   
-    $guide = new Guide(
-        null,
-        $_POST['title'],
-        $_POST['description'],
-        $_POST['language'],
-        $_POST['price'],
-        $_POST['category'],
-        $_POST['region'],
-        $_POST['city'],
-        $_POST['country'], 
-    );
-   
-  
-
-    $guideC->updateGuide($guide, $_POST['id']);
-    header("Location: guideList.php"); 
+  if ($price > 0 && !empty($title) && !empty($description)) {
+      $guide = new Guide(null, $title, $description, $language, $price, $category, $region, $country);
+      $guideC->updateGuide($guide, $_POST['id']);
+      header("Location: guideList.php");
+  } else {
+      $error = "Please ensure all fields are valid.";
+  }
 }
 
 
@@ -71,20 +69,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
    <!-- MENU -->
     <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
       <ul class="navbar-nav">
-        <li class="nav-item">
-          <a class="nav-link active" href="../pages/dashboard.html">
+      <li class="nav-item">
+          <a class="nav-link " href="../pages/guideList.php">
             <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
-              <i class="ni ni-tv-2 text-dark text-sm opacity-10"></i>
+              <i class="ni ni-circle-08 text-dark text-sm opacity-10"></i>
             </div>
-            <span class="nav-link-text ms-1">Dashboard</span>
+            <span class="nav-link-text ms-1">Guides</span>
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link " href="../pages/guideList.php">
+          <a class="nav-link " href="../pages/disponibilitelist.php">
             <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
               <i class="ni ni-calendar-grid-58 text-dark text-sm opacity-10"></i>
             </div>
-            <span class="nav-link-text ms-1">Guides</span>
+            <span class="nav-link-text ms-1">Disponibilites Guides</span>
           </a>
         </li>
        
@@ -154,72 +152,114 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
        
     ?>
    <?php if ($guide): ?>
-<form method="POST" action="">
+<form method="POST" action="" id="editGuideForm">
     <div class="card-body">
         <p class="text-uppercase text-sm">Guide Information</p>
         <div class="row">
             <input class="form-control" type="hidden" name="id" value="<?php echo $guide['id']; ?>">
-
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label class="form-control-label">Title</label>
-                    <input class="form-control" type="text" name="title" value="<?php echo $guide['title']; ?>">
-                </div>
+ <!-- Title -->
+ <div class="col-md-12">
+              <div class="form-group">
+                <label for="title">Title</label>
+                <input class="form-control" type="text" name="title" id="title"  value="<?php echo $guide['title']; ?>"/>
+                <small class="text-danger" id="titleError"></small>
+              </div>
             </div>
-
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label class="form-control-label">Description</label>
-                    <textarea class="form-control" rows="4" name="description"><?php echo $guide['description']; ?></textarea>
-                </div>
+            <!-- Description -->
+            <div class="col-md-12">
+              <div class="form-group">
+                <label for="description">Description</label>
+                <textarea class="form-control" rows="4" name="description" id="description"><?php echo $guide['description']; ?></textarea>
+                <small class="text-danger" id="descriptionError"></small>
+              </div>
             </div>
+         
+          
+           <!-- Language -->
+<div class="col-md-12">
+  <div class="form-group">
+    <label for="language">Language</label>
+    <select class="form-control" name="language" id="language">
+      <option value="">Choose...</option>
+      <option value="French" <?php echo ($guide['language'] === 'French') ? 'selected' : ''; ?>>French</option>
+      <option value="English" <?php echo ($guide['language'] === 'English') ? 'selected' : ''; ?>>English</option>
+      <option value="Arabic" <?php echo ($guide['language'] === 'Arabic') ? 'selected' : ''; ?>>Arabic</option>
+      <option value="Spanish" <?php echo ($guide['language'] === 'Spanish') ? 'selected' : ''; ?>>Spanish</option>
+      <option value="German" <?php echo ($guide['language'] === 'German') ? 'selected' : ''; ?>>German</option>
+      <option value="Italian" <?php echo ($guide['language'] === 'Italian') ? 'selected' : ''; ?>>Italian</option>
+      <option value="Mandarin" <?php echo ($guide['language'] === 'Mandarin') ? 'selected' : ''; ?>>Mandarin</option>
+    </select>
+    <small class="text-danger" id="languageError"></small>
+  </div>
+</div>
 
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label class="form-control-label">Language</label>
-                    <input class="form-control" type="text" name="language" value="<?php echo $guide['language']; ?>">
-                </div>
-            </div>
+           
+
+           
         </div>
         <hr class="horizontal dark">
         <p class="text-uppercase text-sm">Publication Details</p>
-        <div class="row">
-            <div class="col-md-6">
+       
+            <div class="col-md-12">
                 <div class="form-group">
                     <label class="form-control-label">Price</label>
-                    <input class="form-control" name="price" type="text" value="<?php echo $guide['price']; ?>">
+                    <input class="form-control" name="price" type="number" id='price' value="<?php echo $guide['price']; ?>">
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label class="form-control-label">Category</label>
-                    <input class="form-control" name="category" type="text" value="<?php echo $guide['category']; ?>">
-                </div>
-            </div>
-        </div>
+           <!-- Category -->
+<div class="col-md-12">
+  <div class="form-group">
+    <label for="category">Category</label>
+    <select class="form-control" name="category" id="category">
+      <option value="">Choose...</option>
+      <option value="Historical Sites" <?php echo ($guide['category'] === 'Historical Sites') ? 'selected' : ''; ?>>Historical Sites</option>
+      <option value="Museums" <?php echo ($guide['category'] === 'Museums') ? 'selected' : ''; ?>>Museums</option>
+      <option value="Beaches" <?php echo ($guide['category'] === 'Beaches') ? 'selected' : ''; ?>>Beaches</option>
+      <option value="Deserts" <?php echo ($guide['category'] === 'Deserts') ? 'selected' : ''; ?>>Deserts</option>
+      <option value="Cultural Events" <?php echo ($guide['category'] === 'Cultural Events') ? 'selected' : ''; ?>>Cultural Events</option>
+      <option value="Outdoor Activities" <?php echo ($guide['category'] === 'Outdoor Activities') ? 'selected' : ''; ?>>Outdoor Activities</option>
+    </select>
+    <small class="text-danger" id="categoryError"></small>
+  </div>
+</div>
+
+      
         <div class="row">
-            <div class="col-md-4">
-                <div class="form-group">
-                    <label class="form-control-label">Region</label>
-                    <input class="form-control" name="region" type="text" value="<?php echo $guide['region']; ?>">
-                </div>
+            <!-- Country and Region -->
+<div class="col-md-6">
+  <div class="form-group">
+    <label for="country">Country</label>
+    <select class="form-control" name="country" id="country">
+      <option value="">Choose...</option>
+      <option value="Tunisia" <?php echo ($guide['country'] === 'Tunisia') ? 'selected' : ''; ?>>Tunisia</option>
+    </select>
+    <small class="text-danger" id="countryError"></small>
+  </div>
+
+  <div class="form-group mt-3">
+    <label for="region">Region</label>
+    <select class="form-control" name="region" id="region">
+      <option value="">Choose...</option>
+      <option value="Tunis" <?php echo ($guide['region'] === 'Tunis') ? 'selected' : ''; ?>>Tunis</option>
+      <option value="Sfax" <?php echo ($guide['region'] === 'Sfax') ? 'selected' : ''; ?>>Sfax</option>
+      <option value="Sousse" <?php echo ($guide['region'] === 'Sousse') ? 'selected' : ''; ?>>Sousse</option>
+      <option value="Monastir" <?php echo ($guide['region'] === 'Monastir') ? 'selected' : ''; ?>>Monastir</option>
+      <option value="Gabès" <?php echo ($guide['region'] === 'Gabès') ? 'selected' : ''; ?>>Gabès</option>
+    </select>
+    <small class="text-danger" id="regionError"></small>
+  </div>
+</div>
+
+
+            <div class="row mt-4">
+            <div class="col-md-12 d-flex  justify-content-between">
+              
+              <button type="button" class="btn btn-danger" onclick="history.back()">Cancel</button>
+              <button type="submit" class="btn btn-success">Submit</button>
             </div>
-            <div class="col-md-4">
-                <div class="form-group">
-                    <label class="form-control-label">City</label>
-                    <input class="form-control" name="city" type="text" value="<?php echo $guide['city']; ?>">
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="form-group">
-                    <label class="form-control-label">Country</label>
-                    <input class="form-control" name="country" type="text" value="<?php echo $guide['country']; ?>">
-                </div>
-            </div>
+          </div>
         </div>
-        <div class="col-md-12">
-            <button type="submit" class="btn btn-primary">Save Changes</button>
-        </div>
+       
     </div>
 </form>
 <?php else: ?>
@@ -304,6 +344,75 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       </div>
     </div>
   </div>
+  <script>
+   document.getElementById('editGuideForm').addEventListener('submit', function (e) {
+
+    e.preventDefault();
+
+    // Clear previous error messages
+    const errorFields = document.querySelectorAll('.text-danger');
+    errorFields.forEach((error) => (error.textContent = ''));
+
+    let isValid = true;
+
+    // Title validation
+    const title = document.getElementById('title');
+    if (title.value.trim().length < 3) {
+        document.getElementById('titleError').textContent = 'Title must be at least 3 characters.';
+        isValid = false;
+    }
+
+    // Description validation
+    const description = document.getElementById('description');
+    if (description.value.trim().length < 3) {
+        document.getElementById('descriptionError').textContent = 'Description must be at least 3 characters.';
+        isValid = false;
+    }
+
+    // Language validation
+    const language = document.getElementById('language');
+    if (language.value === '') {
+        document.getElementById('languageError').textContent = 'Please select a language.';
+        isValid = false;
+    }
+
+    // Price validation
+
+   const price = document.getElementById('price');
+      if (price.value === '' || parseFloat(price.value) <= 0) {
+        document.getElementById('priceError').textContent = 'Price must be a positive number.';
+        isValid = false;
+      }
+
+
+    // Category validation
+    const category = document.getElementById('category');
+    if (category.value.trim() === '') {
+        document.getElementById('categoryError').textContent = 'Category is required.';
+        isValid = false;
+    }
+
+    // Country validation
+    const country = document.getElementById('country');
+    if (country.value === '') {
+        document.getElementById('countryError').textContent = 'Please select a country.';
+        isValid = false;
+    }
+
+    // Region validation
+    const region = document.getElementById('region');
+    if (region.value === '') {
+        document.getElementById('regionError').textContent = 'Please select a region.';
+        isValid = false;
+    }
+
+    // If not valid, prevent form submission
+    if (isValid) {
+        e.target.submit();  // Submit the form programmatically
+    }
+});
+  </script>
+
   <!--   Core JS Files   -->
   <script src="../assets/js/core/popper.min.js"></script>
   <script src="../assets/js/core/bootstrap.min.js"></script>

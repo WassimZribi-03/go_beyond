@@ -40,18 +40,11 @@ $list = $guideC->listGuides();
    <!-- MENU -->
     <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
       <ul class="navbar-nav">
-        <li class="nav-item">
-          <a class="nav-link active" href="../pages/dashboard.html">
-            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
-              <i class="ni ni-tv-2 text-dark text-sm opacity-10"></i>
-            </div>
-            <span class="nav-link-text ms-1">Dashboard</span>
-          </a>
-        </li>
+       
         <li class="nav-item">
           <a class="nav-link " href="../pages/guideList.php">
             <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
-              <i class="ni ni-calendar-grid-58 text-dark text-sm opacity-10"></i>
+              <i class="ni ni-circle-08 text-dark text-sm opacity-10"></i>
             </div>
             <span class="nav-link-text ms-1">Guides</span>
           </a>
@@ -137,7 +130,7 @@ $list = $guideC->listGuides();
 <th class=" text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Price</th>
 <th class=" text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Category</th>
 
-<th class=" text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Available</th>
+<th class=" text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Actions</th>
 <th class="text-secondary opacity-7"></th>
 
                     </tr>
@@ -157,10 +150,14 @@ $list = $guideC->listGuides();
 
 
 <td class="align-middle">
-    <a href="editGuide.php?id=<?php echo $guide['id']; ?>" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">
+    <a href="editGuide.php?id=<?php echo $guide['id']; ?>" class="text-primary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">
         Edit
     </a>
-    <a href="deleteGuide.php?id=<?php echo $guide['id']; ?>" class="text-secondary font-weight-bold text-xs ms-2" data-toggle="tooltip" data-original-title="Delete user">
+    <a href="deleteGuide.php?id=<?php echo $guide['id']; ?>" 
+       class="text-danger font-weight-bold text-xs ms-2" 
+       data-toggle="tooltip" 
+       data-original-title="Delete user"
+       onclick="return confirmAction('delete this guide?');">
         Delete
     </a>
 </td>
@@ -252,6 +249,11 @@ $list = $guideC->listGuides();
       </div>
     </div>
   </div>
+  <script>
+    function confirmAction(action) {
+        return confirm(`Are you sure you want to ${action}`);
+    }
+</script>
   <!--   Core JS Files   -->
   <script src="../assets/js/core/popper.min.js"></script>
   <script src="../assets/js/core/bootstrap.min.js"></script>

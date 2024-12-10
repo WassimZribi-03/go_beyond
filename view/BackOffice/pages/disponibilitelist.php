@@ -39,16 +39,16 @@ $list = $guideC->listDisponibilities();
    <!-- MENU -->
     <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
       <ul class="navbar-nav">
-        <li class="nav-item">
-          <a class="nav-link active" href="../pages/dashboard.html">
+      <li class="nav-item">
+          <a class="nav-link " href="../pages/guideList.php">
             <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
-              <i class="ni ni-tv-2 text-dark text-sm opacity-10"></i>
+              <i class="ni ni-circle-08 text-dark text-sm opacity-10"></i>
             </div>
-            <span class="nav-link-text ms-1">Dashboard</span>
+            <span class="nav-link-text ms-1">Guides</span>
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link " href="../pages/guideList.php">
+          <a class="nav-link " href="../pages/disponibilitelist.php">
             <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
               <i class="ni ni-calendar-grid-58 text-dark text-sm opacity-10"></i>
             </div>
@@ -113,7 +113,7 @@ $list = $guideC->listDisponibilities();
             <div class="card-header pb-0">
             <div class="d-flex align-items-center">
                 <p class="mb-0">Guides list</p>
-                <button class="btn btn-primary btn-sm ms-auto" onclick="window.location.href='adddispo.php';">Add Guide</button>
+                <button class="btn btn-primary btn-sm ms-auto" onclick="window.location.href='adddispo.php';">Add Disponiblitie</button>
               </div>
             </div>
             <div class="card-body px-0 pt-0 pb-2">
@@ -127,7 +127,7 @@ $list = $guideC->listDisponibilities();
     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Start Time</th>
     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">End Time</th>
     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status</th>
-    <th class="text-secondary opacity-7"></th>
+    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Actions</th>
 </tr>
                     </tr>
                   </thead>
@@ -137,22 +137,25 @@ foreach ($list as $disponibilite) {
     ?> 
     <tr>
         <td class="align-middle text-center text-sm"><?= $disponibilite['id']; ?></td>
-        <td class="align-middle text-sm"><?= $disponibilite['id_guide']; ?></td>
+        <td class="align-middle  text-sm"><?= $disponibilite['id_guide']; ?></td>
         <td class="align-middle text-sm"><?= $disponibilite['available_date']; ?></td>
         <td class="align-middle text-sm"><?= $disponibilite['start_time']; ?></td>
         <td class="align-middle text-sm"><?= $disponibilite['end_time']; ?></td>
         <td class="align-middle text-sm">
-            <?php if ($disponibilite['status'] === '') : ?>
+            <?php if ($disponibilite['status'] == 1) : ?>
                 <span class="badge badge-sm bg-gradient-success">Free</span>
             <?php else : ?>
                 <span class="badge badge-sm bg-gradient-danger">Busy</span>
             <?php endif; ?>
         </td>
         <td class="align-middle">
-            <a href="editDisponibility.php?id=<?= $disponibilite['id']; ?>" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit availability">
+            <a href="editdispo.php?id=<?= $disponibilite['id']; ?>" class="text-primary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit availability">
                 Edit
             </a>
-            <a href="deletedispo.php?id=<?= $disponibilite['id']; ?>" class="text-secondary font-weight-bold text-xs ms-2" data-toggle="tooltip" data-original-title="Delete availability">
+            <a href="deletedispo.php?id=<?= $disponibilite['id']; ?>" class="text-danger font-weight-bold text-xs ms-2" 
+       data-toggle="tooltip" 
+       data-original-title="Delete user"
+       onclick="return confirmAction('delete this disponibilitie?');">
                 Delete
             </a>
         </td>
@@ -244,6 +247,11 @@ foreach ($list as $disponibilite) {
       </div>
     </div>
   </div>
+  <script>
+    function confirmAction(action) {
+        return confirm(`Are you sure you want to ${action}`);
+    }
+</script>
   <!--   Core JS Files   -->
   <script src="../assets/js/core/popper.min.js"></script>
   <script src="../assets/js/core/bootstrap.min.js"></script>

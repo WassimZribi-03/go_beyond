@@ -1,8 +1,15 @@
 <?php
 
-include __DIR__ . '/../../../Controller/disponibilitecontroller.php';
+include_once __DIR__ . '/../../../Controller/disponibilitecontroller.php';
+include_once '../../../Controller/guidecontroller.php';
 
-$guideC = new DisponibilitesGuidesController();
+
+
+$dispoC = new DisponibilitesGuidesController();
+
+
+$guideC = new GuideTouristiqueController();
+$guides = $guideC->listGuides();
 
 $error = "";
 
@@ -21,17 +28,17 @@ if (
         !empty($_POST["status"])
     ) {
         // Créer un nouvel objet Disponibilite avec les attributs
-        $availability = new DisponibilitesGuidesController(
-            null, // L'identifiant est auto-incrémenté dans la base de données
-            $_POST['id_guide'],      // Identifiant du guide
-            $_POST['available_date'], // Date disponible
-            $_POST['start_time'],    // Heure de début
-            $_POST['end_time'],      // Heure de fin
-            $_POST['status']         // Statut (Free ou Busy)
-        );
 
+        $availability = new Disponibility(
+          null, // Auto-increment ID
+          new DateTime($_POST['available_date']), // Convert available_date to DateTime
+          new DateTime($_POST['start_time']), // Convert start_time to DateTime
+          new DateTime($_POST['end_time']), // Convert end_time to DateTime
+          $_POST['id_guide'], // Guide ID
+          $_POST['status'] // Status
+      );
         // Ajouter la disponibilité à l'aide du contrôleur
-        $guideC->addDisponibility($availability);
+        $dispoC->addDisponibility($availability);
 
         // Rediriger vers la liste des disponibilités
         header('Location:disponibilitelist.php');
@@ -81,20 +88,21 @@ if (
    <!-- MENU -->
     <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
       <ul class="navbar-nav">
-        <li class="nav-item">
-          <a class="nav-link active" href="../pages/dashboard.html">
+        
+      <li class="nav-item">
+          <a class="nav-link " href="../pages/guideList.php">
             <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
-              <i class="ni ni-tv-2 text-dark text-sm opacity-10"></i>
+              <i class="ni ni-circle-08 text-dark text-sm opacity-10"></i>
             </div>
-            <span class="nav-link-text ms-1">Dashboard</span>
+            <span class="nav-link-text ms-1">Guides</span>
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link " href="../pages/guideList.php">
+          <a class="nav-link " href="../pages/disponibilitelist.php">
             <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
               <i class="ni ni-calendar-grid-58 text-dark text-sm opacity-10"></i>
             </div>
-            <span class="nav-link-text ms-1">Guides</span>
+            <span class="nav-link-text ms-1">Disponibilites Guides</span>
           </a>
         </li>
        
@@ -154,69 +162,74 @@ if (
         <div class="card">
             <div class="card-header pb-0">
               <div class="d-flex align-items-center">
-                <p class="mb-0">ajout Guide</p>
+                <p class="mb-0">Add Disponibilite</p>
               
               </div>
             </div>
-    <form method="POST" action="">
-            <div class="card-body">
-               <p class="text-uppercase text-sm">Guide Information</p>
-    <div class="row">
-    <div class="col-md-6">
-    <div class="form-group">
-        <label for="example-text-input" class="form-control-label">Guide ID</label>
-        <input class="form-control" type="number" name="id_guide" required>
-    </div>
-</div>
-<div class="col-md-6">
-    <div class="form-group">
-        <label for="example-text-input" class="form-control-label">Available Date</label>
-        <input class="form-control" type="date" name="available_date" required>
-    </div>
-</div>
+            <form method="POST" action="" id="addDispo">
+    <div class="card-body">
+        <p class="text-uppercase text-sm">Guide Information</p>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="id_guide" class="form-control-label">Select Guide</label>
+                    <select class="form-control" name="id_guide" id="id_guide">
+                        <option value="" disabled selected>-- Select a Guide --</option>
+                        <?php foreach ($guides as $guide): ?>
+                            <option value="<?= htmlspecialchars($guide['id']) ?>">
+                                <?= htmlspecialchars($guide['title']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <small class="text-danger" id="idGuideError"></small>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="available_date" class="form-control-label">Available Date</label>
+                    <input class="form-control" type="date" name="available_date" id="available_date">
+                    <small class="text-danger" id="availableDateError"></small>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="start_time" class="form-control-label">Start Time</label>
+                    <input class="form-control" type="time" name="start_time" id="start_time">
+                    <small class="text-danger" id="startTimeError"></small>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="end_time" class="form-control-label">End Time</label>
+                    <input class="form-control" type="time" name="end_time" id="end_time">
+                    <small class="text-danger" id="endTimeError"></small>
+                </div>
+            </div>
+        </div>
 
-<div class="col-md-6">
-    <div class="form-group">
-        <label for="example-text-input" class="form-control-label">Start Time</label>
-        <input class="form-control" type="time" name="start_time" required>
-    </div>
-</div>
-<div class="col-md-6">
-    <div class="form-group">
-        <label for="example-text-input" class="form-control-label">End Time</label>
-        <input class="form-control" type="time" name="end_time" required>
-    </div>
-</div>
+        <hr class="horizontal dark">
+        <p class="text-uppercase text-sm">Status</p>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="status" class="form-control-label">Status</label>
+                    <select class="form-control" name="status" id="status">
+                        <option value="Free">Free</option>
+                        <option value="Busy">Busy</option>
+                    </select>
+                    <small class="text-danger" id="statusError"></small>
+                </div>
+            </div>
+        </div>
 
-<hr class="horizontal dark">
-<p class="text-uppercase text-sm">Status</p>
-<div class="row">
-    <div class="col-md-6">
-        <div class="form-group">
-            <label for="example-text-input" class="form-control-label">Status</label>
-            <select class="form-control" name="status" required>
-                <option value="Free">Free</option>
-                <option value="Busy">Busy</option>
-            </select>
+        <div class="row mt-4">
+            <div class="col-md-12 d-flex justify-content-between">
+                <button type="button" class="btn btn-danger" onclick="history.back()">Cancel</button>
+                <button type="submit" class="btn btn-success">Submit</button>
+            </div>
         </div>
     </div>
-</div>
-
-       
-    <hr class="horizontal dark">
-   
-    </div>
-</div>
-<div class="col-md-12">
-    <button type="submit" class="btn btn-primary">Save </button>
-</div>
-
-          </div>
-       
-        </div>
-      
-      </div>
-    </form>
+</form>
    
     </div>
   </main>
@@ -292,6 +305,60 @@ if (
       </div>
     </div>
   </div>
+  <script>
+      document.getElementById('addDispo').addEventListener('submit', function (e) {
+      e.preventDefault(); // Prevent form submission
+
+        let isValid = true;
+
+        // Clear previous errors
+        const errorFields = document.querySelectorAll('.text-danger');
+        errorFields.forEach((error) => (error.textContent = ''));
+
+        // Get form values
+        const guide = document.getElementById('id_guide').value;
+        const availableDate = document.getElementById('available_date').value;
+        const startTime = document.getElementById('start_time').value;
+        const endTime = document.getElementById('end_time').value;
+
+        // Guide validation
+        if (!guide) {
+            document.getElementById('idGuideError').textContent = 'Please select a guide.';
+            isValid = false;
+        }
+
+        // Date validation
+        const today = new Date().toISOString().split('T')[0];
+        if (!availableDate) {
+            document.getElementById('availableDateError').textContent = 'Please select an available date.';
+            isValid = false;
+        } else if (availableDate < today) {
+            document.getElementById('availableDateError').textContent = 'The date must be today or later.';
+            isValid = false;
+        }
+
+        // Start time validation
+        if (!startTime) {
+            document.getElementById('startTimeError').textContent = 'Please enter a start time.';
+            isValid = false;
+        }
+
+        // End time validation
+        if (!endTime) {
+            document.getElementById('endTimeError').textContent = 'Please enter an end time.';
+            isValid = false;
+        } else if (startTime && endTime <= startTime) {
+            document.getElementById('endTimeError').textContent = 'End time must be after start time.';
+            isValid = false;
+        }
+
+        if (isValid) {
+        this.submit();
+    }
+     
+    });
+</script>
+
   <!--   Core JS Files   -->
   <script src="../assets/js/core/popper.min.js"></script>
   <script src="../assets/js/core/bootstrap.min.js"></script>

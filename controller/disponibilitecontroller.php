@@ -1,5 +1,5 @@
 <?php
-include(__DIR__ . '/../config.php');
+include_once(__DIR__ . '/../config.php');
 include(__DIR__ . '/../Model/disponibilite.php');
 class DisponibilitesGuidesController
 {
@@ -18,17 +18,17 @@ class DisponibilitesGuidesController
     public function addDisponibility($disponibility)
     {
         $sql = "INSERT INTO disponibilites_guides 
-                (id,id_guide, available_date, start_time, end_time, status) 
+                (id, available_date, start_time, end_time, id_guide ,status) 
                 VALUES 
-                (NULL,:id_guide, :available_date, :start_time, :end_time, :status)";
+                (NULL, :available_date, :start_time, :end_time,:id_guide, :status)";
         $db = config::getConnexion();
         try {
             $query = $db->prepare($sql);
             $query->execute([
-                'id_guide' => $disponibility->getIdGuide(),
                 'available_date' => $disponibility->getAvailableDate()->format('Y-m-d'),
-                'start_time' => $disponibility->getStartTime(),
-                'end_time' => $disponibility->getEndTime(),
+                'start_time' => $disponibility->getStartTime()->format('H:i:s'),
+                'end_time' => $disponibility->getEndTime()->format('H:i:s'),
+                'id_guide' => $disponibility->getIdGuide(),
                 'status' => $disponibility->getStatus()
             ]);
         } catch (Exception $e) {
@@ -52,8 +52,8 @@ class DisponibilitesGuidesController
                 'id' => $id,
                 'id_guide' => $disponibility->getIdGuide(),
                 'available_date' => $disponibility->getAvailableDate()->format('Y-m-d'),
-                'start_time' => $disponibility->getStartTime(),
-                'end_time' => $disponibility->getEndTime(),
+                'start_time' => $disponibility->getStartTime()->format('H:i:s'),
+                'end_time' => $disponibility->getEndTime()->format('H:i:s'),
                 'status' => $disponibility->getStatus()
             ]);
 
@@ -88,6 +88,22 @@ class DisponibilitesGuidesController
 
             $disponibility = $query->fetch();
             return $disponibility;
+        } catch (Exception $e) {
+            die('Error: ' . $e->getMessage());
+        }
+    }
+
+
+    public function listDisponibilitiesByGuide($id_guide)
+    {
+        $sql = "SELECT * FROM disponibilites_guides WHERE id_guide = :id_guide  AND status = 1 ";
+        $db = config::getConnexion();
+        try {
+            $query = $db->prepare($sql);
+            $query->bindValue(':id_guide', $id_guide, PDO::PARAM_INT);
+            $query->execute();
+
+            return $query->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
             die('Error: ' . $e->getMessage());
         }

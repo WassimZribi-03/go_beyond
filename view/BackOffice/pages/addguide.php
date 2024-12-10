@@ -10,7 +10,7 @@ $guide = null;
 
 // Check if all required fields are set and not empty
 if (
-    isset($_POST["title"], $_POST["description"], $_POST["language"], $_POST["price"], $_POST["category"], $_POST["region"], $_POST["city"], $_POST["country"])
+    isset($_POST["title"], $_POST["description"], $_POST["language"], $_POST["price"], $_POST["category"], $_POST["region"],  $_POST["country"])
 ) {
     if (
         !empty($_POST["title"]) &&
@@ -19,7 +19,7 @@ if (
         !empty($_POST["price"]) &&
         !empty($_POST["category"]) &&
         !empty($_POST["region"]) &&
-        !empty($_POST["city"]) &&
+       
         !empty($_POST["country"])
     ) {
        
@@ -33,7 +33,6 @@ if (
             $_POST['price'], // Price
             $_POST['category'], // Category
             $_POST['region'], // Region
-            $_POST['city'], // City
             $_POST['country'], // Country
            
         );
@@ -89,23 +88,22 @@ if (
    <!-- MENU -->
     <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
       <ul class="navbar-nav">
-        <li class="nav-item">
-          <a class="nav-link active" href="../pages/dashboard.html">
-            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
-              <i class="ni ni-tv-2 text-dark text-sm opacity-10"></i>
-            </div>
-            <span class="nav-link-text ms-1">Dashboard</span>
-          </a>
-        </li>
-        <li class="nav-item">
+      <li class="nav-item">
           <a class="nav-link " href="../pages/guideList.php">
             <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
-              <i class="ni ni-calendar-grid-58 text-dark text-sm opacity-10"></i>
+              <i class="ni ni-circle-08 text-dark text-sm opacity-10"></i>
             </div>
             <span class="nav-link-text ms-1">Guides</span>
           </a>
         </li>
-       
+        <li class="nav-item">
+          <a class="nav-link " href="../pages/disponibilitelist.php">
+            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="ni ni-calendar-grid-58 text-dark text-sm opacity-10"></i>
+            </div>
+            <span class="nav-link-text ms-1">Disponibilites Guides</span>
+          </a>
+        </li>
       </ul>
     </div>
    
@@ -162,83 +160,111 @@ if (
         <div class="card">
             <div class="card-header pb-0">
               <div class="d-flex align-items-center">
-                <p class="mb-0">ajout Guide</p>
+                <p class="mb-0">Add new Guide</p>
               
               </div>
             </div>
-    <form method="POST" action="">
-            <div class="card-body">
-               <p class="text-uppercase text-sm">Guide Information</p>
-    <div class="row">
-      
-        <div class="col-md-6">
-            <div class="form-group">
-                <label for="example-text-input" class="form-control-label">Title</label>
-                <input class="form-control" type="text" name="title">
+            <form id="guideForm" method="POST" action="">
+        <div class="card-body">
+        <p class="text-uppercase text-sm">Guide Information</p>
+            <!-- Title -->
+            <div class="col-md-12">
+              <div class="form-group">
+                <label for="title">Title</label>
+                <input class="form-control" type="text" name="title" id="title" />
+                <small class="text-danger" id="titleError"></small>
+              </div>
             </div>
-        </div>
-        <div class="col-md-6">
-    <div class="form-group">
-        <label for="example-text-input" class="form-control-label">Description</label>
-        <textarea class="form-control" rows="4" name="description"></textarea>
-    </div>
-</div>
+            <!-- Description -->
+            <div class="col-md-12">
+              <div class="form-group">
+                <label for="description">Description</label>
+                <textarea class="form-control" rows="4" name="description" id="description"></textarea>
+                <small class="text-danger" id="descriptionError"></small>
+              </div>
+            </div>
+         
+          
+            <!-- Language -->
+            <div class="col-md-12">
+              <div class="form-group">
+                <label for="language">Language</label>
+                <select class="form-control" name="language" id="language">
+                  <option value="">Choose...</option>
+                  <option value="French">French</option>
+                  <option value="English">English</option>
+                  <option value="Arabic">Arabic</option>
+                  <option value="Spanish">Spanish</option>
+                  <option value="German">German</option>
+                  <option value="Italian">Italian</option>
+                  <option value="Mandarin">Mandarin</option>
+                </select>
+                <small class="text-danger" id="languageError"></small>
+              </div>
+            </div>
 
-        <div class="col-md-6">
-            <div class="form-group">
-                <label for="example-text-input" class="form-control-label">Language</label>
-                <input class="form-control" type="text" name="language" >
+            <hr class="horizontal dark">
+            <p class="text-uppercase text-sm">Publication Details</p>
+            
+            <!-- Price -->
+            <div class="col-md-12">
+              <div class="form-group">
+                <label for="price">Price</label>
+                <input class="form-control" type="number" name="price" id="price" />
+                <small class="text-danger" id="priceError"></small>
+              </div>
             </div>
-        </div>
-    </div>
-    <hr class="horizontal dark">
-    <p class="text-uppercase text-sm">Publication Details</p>
-    <div class="row">
-       
-        <div class="col-md-6">
-            <div class="form-group">
-                <label for="example-text-input" class="form-control-label">Price</label>
-                <input class="form-control" name="price" type="text" >
+         
+          <div class="row">
+            <!-- Category -->
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="category">Category</label>
+                <select class="form-control" name="category" id="category">
+                  <option value="">Choose...</option>
+                  <option value="Historical Sites">Historical Sites</option>
+                  <option value="Museums">Museums</option>
+                  <option value="Beaches">Beaches</option>
+                  <option value="Deserts">Deserts</option>
+                  <option value="Cultural Events">Cultural Events</option>
+                  <option value="Outdoor Activities">Outdoor Activities</option>
+                </select>
+                <small class="text-danger" id="categoryError"></small>
+              </div>
             </div>
-        </div>
-        <div class="col-md-6">
-            <div class="form-group">
-                <label for="example-text-input" class="form-control-label">Category</label>
-                <input class="form-control" name="category" type="text">
+            <!-- Country, Region -->
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="country">Country</label>
+                <select class="form-control" name="country" id="country">
+                  <option value="">Choose...</option>
+                  <option value="Tunisia">Tunisia</option>
+                </select>
+                <small class="text-danger" id="countryError"></small>
+              </div>
+              <div class="form-group mt-3">
+                <label for="region">Region</label>
+                <select class="form-control" name="region" id="region">
+                  <option value="">Choose...</option>
+                  <option value="Tunis">Tunis</option>
+                  <option value="Sfax">Sfax</option>
+                  <option value="Sousse">Sousse</option>
+                  <option value="Monastir">Monastir</option>
+                  <option value="Gabès">Gabès</option>
+                </select>
+                <small class="text-danger" id="regionError"></small>
+              </div>
             </div>
-        </div>
-       
-    </div>
-    <div class='row'>  <div class="col-md-4">
-            <div class="form-group">
-                <label for="example-text-input" class="form-control-label">Region</label>
-                <input class="form-control" name="region" type="text" >
-            </div>
-        </div><div class="col-md-4">
-            <div class="form-group">
-                <label for="example-text-input" class="form-control-label">City</label>
-                <input class="form-control" name="city" type="text" >
-            </div>
-        </div><div class="col-md-4">
-            <div class="form-group">
-                <label for="example-text-input" class="form-control-label">Country</label>
-                <input class="form-control" name="country" type="text" >
-            </div>
-        </div> </div>
-    <hr class="horizontal dark">
-   
-    </div>
-</div>
-<div class="col-md-12">
-    <button type="submit" class="btn btn-primary">Save </button>
-</div>
-
           </div>
-       
+          <div class="row mt-4">
+            <div class="col-md-12 d-flex  justify-content-between">
+              
+              <button type="button" class="btn btn-danger" onclick="history.back()">Cancel</button>
+              <button type="submit" class="btn btn-success">Submit</button>
+            </div>
+          </div>
         </div>
-      
-      </div>
-    </form>
+      </form>
    
     </div>
   </main>
@@ -314,6 +340,72 @@ if (
       </div>
     </div>
   </div>
+
+  <script>
+    document.getElementById('guideForm').addEventListener('submit', function (e) {
+      e.preventDefault(); // Prevent form submission
+
+      // Clear previous error messages
+      const errorFields = document.querySelectorAll('.text-danger');
+      errorFields.forEach((error) => (error.textContent = ''));
+
+      let isValid = true;
+
+      // Title validation
+      const title = document.getElementById('title');
+      if (title.value.trim().length < 3) {
+        document.getElementById('titleError').textContent = 'Title must be at least 3 characters.';
+        isValid = false;
+      }
+
+      // Description validation
+      const description = document.getElementById('description');
+      if (description.value.trim().length < 3) {
+        document.getElementById('descriptionError').textContent = 'Description must be at least 3 characters.';
+        isValid = false;
+      }
+
+      // Language validation
+      const language = document.getElementById('language');
+      if (language.value === '') {
+        document.getElementById('languageError').textContent = 'Please select a language.';
+        isValid = false;
+      }
+
+      // Price validation
+      const price = document.getElementById('price');
+      if (price.value === '' || parseFloat(price.value) <= 0) {
+        document.getElementById('priceError').textContent = 'Price must be a positive number.';
+        isValid = false;
+      }
+
+      // Category validation
+      const category = document.getElementById('category');
+      if (category.value.trim() === '') {
+        document.getElementById('categoryError').textContent = 'Category is required.';
+        isValid = false;
+      }
+
+      // Country validation
+      const country = document.getElementById('country');
+      if (country.value === '') {
+        document.getElementById('countryError').textContent = 'Please select a country.';
+        isValid = false;
+      }
+
+      // Region validation
+      const region = document.getElementById('region');
+      if (region.value === '') {
+        document.getElementById('regionError').textContent = 'Please select a region.';
+        isValid = false;
+      }
+      if (isValid) {
+        this.submit();
+    }
+     
+    });
+  </script>
+
   <!--   Core JS Files   -->
   <script src="../assets/js/core/popper.min.js"></script>
   <script src="../assets/js/core/bootstrap.min.js"></script>

@@ -9,7 +9,7 @@ class Guide {
     private ?float $price;            // Prix du guide (si vendu)
     private ?string $category;        // Catégorie (ex. Culture, Nature)
     private ?string $region;      
-    private ?string $city;  
+
     private ?string $country;    // Région ou lieu couvert par le guide
    
     // Constructor
@@ -22,7 +22,7 @@ class Guide {
         ?float $price,
         ?string $category,
         ?string $region,
-        ?string $city,
+
         ?string $country,
         
     ) {
@@ -34,7 +34,7 @@ class Guide {
         $this->price = $price;
         $this->category = $category;
         $this->region = $region;
-        $this->city = $city;
+      
         $this->country = $country;
       
     }
@@ -98,13 +98,7 @@ class Guide {
         $this->region = $region;
     }
 
-    public function getCity(): ?string {
-        return $this->city;
-    }
-
-    public function setCity(?string $city): void {
-        $this->city = $city;
-    }
+   
     public function getCountry(): ?string {
         return $this->country;
     }
