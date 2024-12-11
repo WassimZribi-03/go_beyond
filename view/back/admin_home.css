@@ -1,0 +1,244 @@
+/* General styles for the body */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+}
+
+/* General styles for the container */
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px;
+}
+
+/* Header styles */
+.header {
+    display: flex;
+    height: 80px;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #16172d;
+    color: white;
+    padding: 10px 20px;
+}
+
+/* Profile styles */
+.profile {
+    display: flex;
+    align-items: center;
+}
+
+.profile-pic {
+    width: 75px;
+    height: 75px;
+    /*background-color: #696d75;*/
+    border-radius: 50%;
+    margin-right: 15px;
+}
+
+.profile-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.profile-text .name {
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.profile-text .title {
+    font-size: 0.9em;
+    color: #bbbbbb;
+}
+
+/* Navigation styles */
+.nav {
+    display: flex;
+    gap: 30px;
+}
+
+.nav-item {
+    cursor: pointer;
+    font-size: 1em;
+}
+
+.nav-item:hover {
+    text-decoration: underline;
+}
+
+/* Card styles */
+.card {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 15px; /* Increased radius for smoother corners */
+    padding: 15px;
+    margin: 10px;
+    width: 600px; /* Fixed width for cards */
+    text-align: center; /* Center text inside cards */
+    transition: box-shadow 0.3s; /* Smooth transition for hover effect */
+}
+
+/* Flexbox for side by side cards */
+.list-container {
+    display: flex; /* Use flexbox to arrange cards in a row */
+    justify-content: center; /* Center the cards horizontally */
+    flex-wrap: wrap; /* Allow cards to wrap to the next line if necessary */
+}
+
+/* Hover effect for cards */
+.card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow effect on hover */
+}
+
+/* Button styles */
+.buttons {
+    display: flex;
+    justify-content: space-between;
+}
+
+.btn {
+    padding: 10px 15px;
+    width: 120px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-delete {
+    background-color: #e83c29; /* Red for delete */
+    color: white;
+}
+
+.btn-add {
+    background-color: #2ecc71; /* Green for add */
+    color: white;
+}
+
+/* Overlay and modal styles */
+.overlay {
+    display: none; /* Hidden by default */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    z-index: 1000; /* Ensure modal is on top */
+}
+
+.active {
+    display: block; /* Show when active */
+}
+
+/* Form styles */
+.form-group {
+    margin-bottom: 15px;
+}
+
+.btn-submit {
+    background-color: #3498db; /* Blue for submit */
+    color: white;
+}
+
+.btn-cancel {
+    background-color: #95a5a6; /* Grey for cancel */
+    color: white;
+}
+
+/* Members list styles */
+.list-container {
+    padding: 20px;
+    background-color: #f9f9f9; /* Light background for contrast */
+    border: 1px solid #ddd; /* Light border for definition */
+    border-radius: 10px; /* Rounded corners */
+    margin-top: 20px; /* Space above the list */
+    max-width: 600px; /* Limit the width of the list */
+    margin-left: auto; /* Center the list horizontally */
+    margin-right: auto; /* Center the list horizontally */
+}
+
+.member {
+    background-color: #ffffff; /* White background for each member */
+    border: 1px solid #ccc; /* Slightly darker border */
+    border-radius: 10px; /* Rounded corners */
+    padding: 15px; /* Padding inside each member box */
+    margin-bottom: 10px; /* Space between member entries */
+    transition: box-shadow 0.3s; /* Smooth transition for hover effect */
+}
+
+/* Hover effect for member entries */
+.member:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow effect on hover */
+}
+
+.member h3 {
+    color: #3498db; /* Example color for headings */
+    margin: 0; /* Remove default margin */
+}
+
+.member p {
+    margin: 5px 0; /* Space between paragraphs */
+    font-size: 16px; /* Font size for member details */
+    color: #333; /* Dark text color for readability */
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 600px) {
+    .list-container {
+        flex-direction: column; /* Stack cards vertically on small screens */
+        align-items: center; /* Center cards */
+    }
+
+    .card {
+        width: 90%; /* Full width on small screens */
+    }
+}/* Search container styles */
+.search-container {
+    display: flex; /* Use flexbox to align items */
+    align-items: center; /* Center items vertically */
+}
+
+/* Search bar styles */
+.search-bar {
+    padding: 8px; /* Padding inside the search bar */
+    border: 1px solid #ccc; /* Light border */
+    border-radius: 5px 0 0 5px; /* Rounded corners on the left */
+    font-size: 1em; /* Font size */
+    width: 300px; /* Width of the search bar */
+    transition: border-color 0.3s; /* Smooth transition for border color */
+}
+
+/* Search button styles */
+.search-button {
+    padding: 8px 12px; /* Padding inside the button */
+    border: 1px solid #3498db; /* Border matching the theme */
+    background-color: #3498db; /* Button background color */
+    color: white; /* Text color */
+    border-radius: 0 5px 5px 0; /* Rounded corners on the right */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s; /* Smooth transition for background color */
+}
+
+/* Hover effect for the search button */
+.search-button:hover {
+    background-color: #2980b9; /* Darker shade on hover */
+}
+
+/* Focus effect for the search bar */
+.search-bar:focus {
+    border-color: #3498db; /* Change border color on focus */
+    outline: none; /* Remove default outline */
+}

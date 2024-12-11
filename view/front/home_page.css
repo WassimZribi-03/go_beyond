@@ -1,0 +1,152 @@
+
+body {
+    font-family: Arial, sans-serif;
+    background-color:white;
+    margin: 0;
+    padding: 0;
+}
+.header {
+    background-color:#16172d;
+    color: black;
+    padding: 10px 20px;
+    text-align: center;
+}
+
+
+.content {
+    margin: 20px;
+}
+.activity-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}.logo1{
+    
+    position:absolute;
+    top:10px;
+    left:10px;
+    width: 100px;
+    background-color: rgb(248, 242, 242);
+
+}
+.logo{
+   height: fit-content;
+}
+h1{
+    background-color: #16172d;
+    color:#ffc977;
+}
+a{
+    color: white;
+    margin-left: 100px;
+    
+}
+.activity:hover {
+    transform: scale(1.05);}
+.activity {
+    width: 150px;
+    height: 250px;
+
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    color: white;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.2s;}
+.activity img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.activity-content {
+    background: rgba(0, 0, 0, 0.6);
+    padding: 10px;
+    text-align: center;
+}
+.activity-title {
+    font-size: 16px;
+    font-weight: bold;
+}
+.activity h2 {
+    margin: 10px 0 0;
+    font-size: 16px;
+    color: #333;
+}
+.footer-link {
+    display: block;
+    text-align: center;
+    font-size: 18px;
+    color: blue;
+    text-decoration: none;
+    margin: 20px 0;
+}
+    .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    background-color: #333;
+    color: white;
+}
+
+
+/* Header styles */
+.header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+background-color: #16172d;
+color: white;
+padding: 10px 20px;
+}
+
+/* Profile styles */
+.profile {
+display: flex;
+align-items: center;
+}
+
+.profile-pic {
+width: 50px;
+height: 50px;
+background-color: #ccc;
+border-radius: 50%;
+margin-right: 15px;
+}
+
+.profile-text {
+display: flex;
+flex-direction: column;
+}
+
+.profile-text .name {
+font-weight: bold;
+font-size: 1.2em;
+}
+
+.profile-text .title {
+font-size: 0.9em;
+color: #bbbbbb;
+}
+
+/* Navigation styles */
+.nav {
+display: flex;
+gap: 15px;
+}
+
+.nav-item {
+cursor: pointer;
+font-size: 1em;
+}
+
+.nav-item:hover {
+text-decoration: underline;
+}
