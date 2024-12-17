@@ -5,12 +5,12 @@ include_once(__DIR__ . '/../Models/Booking.php');
 class BookingController
 {
     // List all bookings with tour information
-    public function listBookingsWithTours()
+    public function listBookingsWithTours($filters = [])
     {
         try {
             $db = config::getConnexion();
             
-            $query = $db->prepare("
+            $sql = "
                 SELECT 
                     bookings.*,
                     tours.name AS tour_name,
@@ -21,10 +21,46 @@ class BookingController
                 FROM bookings
                 INNER JOIN tours 
                     ON bookings.tour_id = tours.id
-                ORDER BY bookings.booking_date DESC
-            ");
+                WHERE 1=1
+            ";
+            
+            $params = [];
 
-            $query->execute();
+            // Apply filters
+            if (!empty($filters['customer_name'])) {
+                $sql .= " AND bookings.customer_name LIKE ?";
+                $params[] = "%" . $filters['customer_name'] . "%";
+            }
+
+            if (!empty($filters['tour_name'])) {
+                $sql .= " AND tours.name LIKE ?";
+                $params[] = "%" . $filters['tour_name'] . "%";
+            }
+
+            if (!empty($filters['date_from'])) {
+                $sql .= " AND bookings.booking_date >= ?";
+                $params[] = $filters['date_from'];
+            }
+
+            if (!empty($filters['date_to'])) {
+                $sql .= " AND bookings.booking_date <= ?";
+                $params[] = $filters['date_to'];
+            }
+
+            if (!empty($filters['min_price'])) {
+                $sql .= " AND tours.price >= ?";
+                $params[] = $filters['min_price'];
+            }
+
+            if (!empty($filters['max_price'])) {
+                $sql .= " AND tours.price <= ?";
+                $params[] = $filters['max_price'];
+            }
+
+            $sql .= " ORDER BY bookings.booking_date DESC";
+            
+            $query = $db->prepare($sql);
+            $query->execute($params);
             return $query->fetchAll(PDO::FETCH_ASSOC);
 
         } catch (PDOException $e) {
@@ -130,6 +166,91 @@ class BookingController
             echo $query->rowCount() . " records UPDATED successfully <br>";
         } catch (PDOException $e) {
             echo 'Error: ' . $e->getMessage();
+        }
+    }
+
+    // Get total number of bookings
+    public function getTotalBookings()
+    {
+        try {
+            $db = config::getConnexion();
+            $query = $db->query("SELECT COUNT(*) FROM bookings");
+            return $query->fetchColumn();
+        } catch (Exception $e) {
+            error_log("Error getting total bookings: " . $e->getMessage());
+            return 0;
+        }
+    }
+
+    // Get recent bookings with tour information
+    public function getRecentBookings($limit = 5)
+    {
+        try {
+            $db = config::getConnexion();
+            $query = $db->prepare("
+                SELECT 
+                    bookings.*,
+                    tours.name AS tour_name,
+                    tours.destination,
+                    tours.duration
+                FROM bookings
+                INNER JOIN tours ON bookings.tour_id = tours.id
+                ORDER BY bookings.created_at DESC
+                LIMIT :limit
+            ");
+            $query->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $query->execute();
+            return $query->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log("Error getting recent bookings: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    // Get today's bookings count
+    public function getTodayBookingsCount()
+    {
+        try {
+            $db = config::getConnexion();
+            $query = $db->query("SELECT COUNT(*) FROM bookings WHERE DATE(booking_date) = CURDATE()");
+            return $query->fetchColumn();
+        } catch (Exception $e) {
+            error_log("Error getting today's bookings: " . $e->getMessage());
+            return 0;
+        }
+    }
+
+    // Get total earnings from all bookings
+    public function getTotalEarnings()
+    {
+        try {
+            $db = config::getConnexion();
+            $query = $db->query("
+                SELECT SUM(t.price) as total_earnings
+                FROM bookings b
+                JOIN tours t ON b.tour_id = t.id
+            ");
+            return $query->fetchColumn() ?: 0;
+        } catch (Exception $e) {
+            error_log("Error getting total earnings: " . $e->getMessage());
+            return 0;
+        }
+    }
+
+    // Get average tour price
+    public function getAverageTourPrice()
+    {
+        try {
+            $db = config::getConnexion();
+            $query = $db->query("
+                SELECT AVG(t.price) as avg_price
+                FROM bookings b
+                JOIN tours t ON b.tour_id = t.id
+            ");
+            return round($query->fetchColumn(), 2) ?: 0;
+        } catch (Exception $e) {
+            error_log("Error getting average price: " . $e->getMessage());
+            return 0;
         }
     }
 }

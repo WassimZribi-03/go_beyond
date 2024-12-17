@@ -161,10 +161,15 @@ class TourController
     }
 
     // Enhanced tour filtering with ratings and favorites
-    public function getFilteredTours($destination = '', $min_price = '', $max_price = '', $duration = '') {
+    public function getFilteredTours($destination = '', $min_price = '', $max_price = '', $duration = '', $name = '') {
         try {
             $sql = "SELECT * FROM tours WHERE 1=1";
             $params = [];
+
+            if (!empty($name)) {
+                $sql .= " AND name LIKE ?";
+                $params[] = "%$name%";
+            }
 
             if (!empty($destination)) {
                 $sql .= " AND destination LIKE ?";
@@ -185,6 +190,8 @@ class TourController
                 $sql .= " AND duration = ?";
                 $params[] = $duration;
             }
+
+            $sql .= " ORDER BY name ASC";
 
             $query = $this->db->prepare($sql);
             $query->execute($params);
@@ -276,6 +283,19 @@ class TourController
             return $tour;
         } catch (Exception $e) {
             throw new Exception("Error fetching tour: " . $e->getMessage());
+        }
+    }
+
+    // Get total number of tours
+    public function getTotalTours()
+    {
+        try {
+            $db = config::getConnexion();
+            $query = $db->query("SELECT COUNT(*) FROM tours");
+            return $query->fetchColumn();
+        } catch (Exception $e) {
+            error_log("Error getting total tours: " . $e->getMessage());
+            return 0;
         }
     }
 }
