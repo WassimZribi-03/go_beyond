@@ -4,6 +4,17 @@ include(__DIR__ . '/../Models/Tour.php');
 
 class TourController
 {
+    private $db;
+
+    public function __construct() {
+        try {
+            $this->db = config::getConnexion();
+        } catch (Exception $e) {
+            error_log("Database connection error: " . $e->getMessage());
+            throw new Exception("Database connection failed");
+        }
+    }
+
     // List all tours with booking count
     public function listToursWithBookings()
     {
@@ -32,13 +43,14 @@ class TourController
     // List all tours
     public function listTours()
     {
-        $sql = "SELECT * FROM tours";
-        $db = config::getConnexion();
         try {
-            $liste = $db->query($sql);
-            return $liste;
-        } catch (Exception $e) {
-            die('Error: ' . $e->getMessage());
+            $query = "SELECT * FROM tours";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error listing tours: " . $e->getMessage());
+            return [];
         }
     }
 
@@ -59,22 +71,40 @@ class TourController
     }
 
     // Add a new tour
-    public function addTour($tour)
-    {
-        $sql = "INSERT INTO tours (name, destination, duration, price, description) 
-                VALUES (:name, :destination, :duration, :price, :description)";
-        $db = config::getConnexion();
+    public function addTour($tour, $image = null) {
         try {
-            $query = $db->prepare($sql);
+            if ($image && $image['error'] === UPLOAD_ERR_OK) {
+                $uploadDir = 'public/assets/images/tours/';
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
+
+                $fileName = uniqid() . '_' . basename($image['name']);
+                $uploadPath = $uploadDir . $fileName;
+
+                if (move_uploaded_file($image['tmp_name'], $uploadPath)) {
+                    $tour->setImageUrl('assets/images/tours/' . $fileName);
+                }
+            }
+
+            $db = config::getConnexion();
+            $query = $db->prepare(
+                'INSERT INTO tours (name, destination, duration, price, description, image_url) 
+                 VALUES (:name, :destination, :duration, :price, :description, :image_url)'
+            );
+
             $query->execute([
                 'name' => $tour->getName(),
                 'destination' => $tour->getDestination(),
                 'duration' => $tour->getDuration(),
                 'price' => $tour->getPrice(),
                 'description' => $tour->getDescription(),
+                'image_url' => $tour->getImageUrl()
             ]);
+
+            return true;
         } catch (Exception $e) {
-            echo 'Error: ' . $e->getMessage();
+            throw new Exception("Error adding tour: " . $e->getMessage());
         }
     }
 
@@ -130,38 +160,102 @@ class TourController
         }
     }
 
-    public function getFilteredTours($destination = '', $minPrice = '', $maxPrice = '', $duration = '') {
+    // Enhanced tour filtering with ratings and favorites
+    public function getFilteredTours($destination = '', $min_price = '', $max_price = '', $duration = '') {
         try {
-            $db = config::getConnexion();
-            $query = "SELECT * FROM tours WHERE 1=1";
+            $sql = "SELECT * FROM tours WHERE 1=1";
             $params = [];
 
             if (!empty($destination)) {
-                $query .= " AND destination LIKE :destination";
-                $params['destination'] = "%$destination%";
+                $sql .= " AND destination LIKE ?";
+                $params[] = "%$destination%";
             }
 
-            if (!empty($minPrice)) {
-                $query .= " AND price >= :min_price";
-                $params['min_price'] = $minPrice;
+            if (!empty($min_price)) {
+                $sql .= " AND price >= ?";
+                $params[] = $min_price;
             }
 
-            if (!empty($maxPrice)) {
-                $query .= " AND price <= :max_price";
-                $params['max_price'] = $maxPrice;
+            if (!empty($max_price)) {
+                $sql .= " AND price <= ?";
+                $params[] = $max_price;
             }
 
             if (!empty($duration)) {
-                $query .= " AND duration = :duration";
-                $params['duration'] = $duration;
+                $sql .= " AND duration = ?";
+                $params[] = $duration;
             }
 
-            $stmt = $db->prepare($query);
-            $stmt->execute($params);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (Exception $e) {
-            error_log("Filter error: " . $e->getMessage());
+            $query = $this->db->prepare($sql);
+            $query->execute($params);
+            return $query->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error filtering tours: " . $e->getMessage());
             return [];
+        }
+    }
+
+    // Rating system methods
+    public function addRating($tour_id, $rating, $comment = null) {
+        try {
+            $query = $this->db->prepare("
+                INSERT INTO ratings (tour_id, rating, comment) 
+                VALUES (?, ?, ?)
+            ");
+            return $query->execute([$tour_id, $rating, $comment]);
+        } catch (PDOException $e) {
+            error_log("Error adding rating: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function getAverageRating($tour_id) {
+        try {
+            $query = $this->db->prepare("
+                SELECT AVG(rating) as avg_rating, COUNT(*) as count 
+                FROM ratings 
+                WHERE tour_id = ?
+            ");
+            $query->execute([$tour_id]);
+            $result = $query->fetch(PDO::FETCH_ASSOC);
+            return [
+                'average' => round($result['avg_rating'] ?? 0, 1),
+                'count' => $result['count'] ?? 0
+            ];
+        } catch (PDOException $e) {
+            error_log("Error getting average rating: " . $e->getMessage());
+            return ['average' => 0, 'count' => 0];
+        }
+    }
+
+    // Favorite functionality
+    public function isFavorited($tour_id) {
+        try {
+            $query = $this->db->prepare("SELECT COUNT(*) FROM favorites WHERE tour_id = ?");
+            $query->execute([$tour_id]);
+            return $query->fetchColumn() > 0;
+        } catch (PDOException $e) {
+            error_log("Error checking favorite status: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function addToFavorites($tour_id) {
+        try {
+            if ($this->isFavorited($tour_id)) {
+                // Remove from favorites
+                $query = $this->db->prepare("DELETE FROM favorites WHERE tour_id = ?");
+                $result = $query->execute([$tour_id]);
+                return ['success' => $result, 'action' => 'removed'];
+            } else {
+                // Add to favorites
+                $query = $this->db->prepare("INSERT INTO favorites (tour_id) VALUES (?)");
+                $result = $query->execute([$tour_id]);
+                return ['success' => $result, 'action' => 'added'];
+            }
+        } catch (PDOException $e) {
+            error_log("Error toggling favorite: " . $e->getMessage());
+            return ['success' => false, 'error' => $e->getMessage()];
         }
     }
 

@@ -1,6 +1,7 @@
 <?php
+session_start();
 include_once '../../Controllers/BookingController.php';
-include_once '../../Models/Booking.php';
+include_once '../../Controllers/TourController.php';
 
 $bookingController = new BookingController();
 $bookings = $bookingController->listBookingsWithTours();
@@ -14,195 +15,270 @@ $bookings = $bookingController->listBookingsWithTours();
     <title>My Bookings</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        :root {
+            --primary-color: #D2B48C;
+            --secondary-color: #BC8F8F;
+            --accent-color: #DEB887;
+            --text-color: #5D4037;
+            --light-beige: #F5F5DC;
+            --white: #FFFFFF;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-            padding: 40px 20px;
+            background-color: var(--light-beige);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 2rem;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 3rem 0;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 1rem;
+            color: var(--white);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+            z-index: 1;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 2;
         }
 
         h1 {
-            text-align: center;
-            color: #2d3436;
-            margin-bottom: 40px;
-            font-size: 2.5em;
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            color: var(--white);
+            text-transform: uppercase;
+            letter-spacing: 2px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
 
-        .bookings-list {
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .bookings-grid {
             display: grid;
-            gap: 30px;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
         }
 
         .booking-card {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            background: var(--white);
+            border: none;
+            border-radius: 1.5rem;
+            padding: 2rem;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
 
         .booking-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
         }
 
         .booking-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #e0e0e0;
+            border-bottom: 2px solid var(--light-beige);
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
         }
 
-        .booking-header h3 {
-            font-size: 1.5em;
-            color: #2d3436;
-            font-weight: 600;
+        .booking-title {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-weight: 700;
         }
 
-        .price {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 8px 15px;
-            border-radius: 25px;
-            color: white;
-            font-weight: bold;
-            font-size: 1.2em;
-        }
-
-        .booking-details {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-
-        .detail-item {
+        .booking-info {
+            margin: 1rem 0;
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.5);
-            border-radius: 10px;
+            gap: 1rem;
+            font-size: 1.1rem;
         }
 
-        .detail-item i {
-            font-size: 1.2em;
-            color: #667eea;
+        .booking-info i {
+            color: var(--accent-color);
             width: 24px;
+            font-size: 1.2rem;
         }
 
-        .detail-label {
+        .status-badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            border-radius: 2rem;
+            font-size: 1rem;
+            background-color: #4CAF50;
+            color: var(--white);
+            margin-top: 1.5rem;
             font-weight: 600;
-            color: #2d3436;
-            margin-right: 8px;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
         }
 
-        .detail-value {
-            color: #636e72;
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 3rem;
+            gap: 1.5rem;
         }
 
-        .no-bookings {
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1.2rem 2.5rem;
+            text-decoration: none;
+            border-radius: 0.8rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+
+        .btn i {
+            font-size: 1.2rem;
+        }
+
+        .empty-state {
             text-align: center;
-            padding: 50px;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            padding: 4rem;
+            background: linear-gradient(135deg, var(--light-beige), #fff);
+            border-radius: 1.5rem;
+            margin: 3rem 0;
         }
 
-        .no-bookings h2 {
-            color: #2d3436;
-            margin-bottom: 15px;
+        .empty-state i {
+            font-size: 4rem;
+            color: var(--accent-color);
+            margin-bottom: 1.5rem;
         }
 
-        .no-bookings p {
-            color: #636e72;
-            font-size: 1.1em;
+        .empty-state h2 {
+            font-size: 2rem;
+            color: var(--text-color);
+            margin-bottom: 1rem;
+        }
+
+        .empty-state p {
+            font-size: 1.2rem;
+            color: var(--text-color);
+            opacity: 0.8;
         }
 
         @media (max-width: 768px) {
-            .booking-details {
-                grid-template-columns: 1fr;
+            h1 {
+                font-size: 2.5rem;
             }
-            
-            .booking-header {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .booking-card {
+                padding: 1.5rem;
+            }
+
+            .booking-title {
+                font-size: 1.3rem;
+            }
+
+            .booking-info {
+                font-size: 1rem;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>My Travel Bookings</h1>
-        
-        <?php if (!empty($bookings)): ?>
-            <div class="bookings-list">
-                <?php foreach($bookings as $booking): ?>
+        <div class="header">
+            <div class="header-content">
+                <h1>My Bookings</h1>
+                <p>Track and manage all your amazing tour adventures in one place</p>
+            </div>
+        </div>
+
+        <?php if (empty($bookings)): ?>
+            <div class="empty-state">
+                <i class="fas fa-calendar-times"></i>
+                <h2>No Bookings Found</h2>
+                <p>You haven't made any bookings yet.</p>
+            </div>
+        <?php else: ?>
+            <div class="bookings-grid">
+                <?php foreach ($bookings as $booking): ?>
                     <div class="booking-card">
                         <div class="booking-header">
-                            <h3><?php echo htmlspecialchars($booking['tour_name']); ?></h3>
-                            <span class="price"><?php echo htmlspecialchars($booking['tour_price']); ?> DT</span>
-                        </div>
-                        <div class="booking-details">
-                            <div class="detail-item">
+                            <h3 class="booking-title"><?php echo htmlspecialchars($booking['tour_name']); ?></h3>
+                            <div class="booking-info">
                                 <i class="fas fa-map-marker-alt"></i>
-                                <div>
-                                    <span class="detail-label">Destination:</span>
-                                    <span class="detail-value"><?php echo htmlspecialchars($booking['destination']); ?></span>
-                                </div>
+                                <span><?php echo htmlspecialchars($booking['destination']); ?></span>
                             </div>
-                            <div class="detail-item">
-                                <i class="fas fa-clock"></i>
-                                <div>
-                                    <span class="detail-label">Duration:</span>
-                                    <span class="detail-value"><?php echo htmlspecialchars($booking['duration']); ?> days</span>
-                                </div>
-                            </div>
-                            <div class="detail-item">
-                                <i class="fas fa-user"></i>
-                                <div>
-                                    <span class="detail-label">Customer:</span>
-                                    <span class="detail-value"><?php echo htmlspecialchars($booking['customer_name']); ?></span>
-                                </div>
-                            </div>
-                            <div class="detail-item">
-                                <i class="fas fa-envelope"></i>
-                                <div>
-                                    <span class="detail-label">Email:</span>
-                                    <span class="detail-value"><?php echo htmlspecialchars($booking['customer_email']); ?></span>
-                                </div>
-                            </div>
-                            <div class="detail-item">
-                                <i class="fas fa-calendar"></i>
-                                <div>
-                                    <span class="detail-label">Booking Date:</span>
-                                    <span class="detail-value"><?php echo htmlspecialchars($booking['booking_date']); ?></span>
-                                </div>
-                            </div>
+                        </div>
+                        
+                        <div class="booking-info">
+                            <i class="fas fa-calendar"></i>
+                            <span>Booking Date: <?php echo htmlspecialchars($booking['booking_date']); ?></span>
+                        </div>
+                        
+                        <div class="booking-info">
+                            <i class="fas fa-clock"></i>
+                            <span>Duration: <?php echo htmlspecialchars($booking['duration']); ?> days</span>
+                        </div>
+                        
+                        <div class="booking-info">
+                            <i class="fas fa-tag"></i>
+                            <span>Price: <?php echo htmlspecialchars($booking['tour_price']); ?> DT</span>
+                        </div>
+
+                        <div class="status-badge">
+                            Confirmed
                         </div>
                     </div>
                 <?php endforeach; ?>
             </div>
-        <?php else: ?>
-            <div class="no-bookings">
-                <h2>No Bookings Found</h2>
-                <p>You haven't made any travel bookings yet. Start planning your next adventure!</p>
-            </div>
         <?php endif; ?>
+
+        <div class="button-container">
+            <a href="tours.php" class="btn btn-primary">
+                <i class="fas fa-arrow-left"></i> Back to Tours
+            </a>
+        </div>
     </div>
 </body>
 </html> 

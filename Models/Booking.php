@@ -72,6 +72,10 @@ if (!class_exists('Booking')) {
         public function setBookingDate(?DateTime $booking_date): void {
             $this->booking_date = $booking_date;
         }
+
+        public function getBookingDateFormatted(): ?string {
+            return $this->booking_date ? $this->booking_date->format('Y-m-d') : null;
+        }
     }
 }
 ?>

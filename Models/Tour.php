@@ -7,6 +7,7 @@ if (!class_exists('Tour')) {
         private ?int $duration;
         private ?float $price;
         private ?string $description;
+        private ?string $image_url;
         private $db;
 
         public function __construct(
@@ -15,7 +16,8 @@ if (!class_exists('Tour')) {
             ?string $destination = null, 
             ?int $duration = null, 
             ?float $price = null, 
-            ?string $description = null
+            ?string $description = null, 
+            ?string $image_url = null
         ) {
             $this->id = $id;
             $this->name = $name;
@@ -23,6 +25,7 @@ if (!class_exists('Tour')) {
             $this->duration = $duration;
             $this->price = $price;
             $this->description = $description;
+            $this->image_url = $image_url;
             $this->db = config::getConnexion();
         }
 
@@ -73,6 +76,14 @@ if (!class_exists('Tour')) {
 
         public function setDescription(?string $description): void {
             $this->description = $description;
+        }
+
+        public function getImageUrl(): ?string {
+            return $this->image_url;
+        }
+
+        public function setImageUrl(?string $image_url): void {
+            $this->image_url = $image_url;
         }
 
         public function getTourById($id) {

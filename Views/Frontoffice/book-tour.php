@@ -1,25 +1,71 @@
 <?php
 session_start();
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 include_once '../../Controllers/TourController.php';
+include_once '../../Controllers/BookingController.php';
+include_once '../../Models/Booking.php';
 
-// Check if tour_id is provided
+// Get tour ID from URL
 if (!isset($_GET['tour_id'])) {
-    echo "<script>
-        alert('No tour selected. Please select a tour first.');
-        window.location.href='tours.php';
-    </script>";
+    header('Location: tours.php');
     exit();
 }
 
+$tourController = new TourController();
+$bookingController = new BookingController();
+
 try {
-    $tourController = new TourController();
     $tour = $tourController->getTourById($_GET['tour_id']);
+    if (!$tour) {
+        throw new Exception("Tour not found");
+    }
 } catch (Exception $e) {
-    echo "<script>
-        alert('Error loading tour: " . addslashes($e->getMessage()) . "');
-        window.location.href='tours.php';
-    </script>";
+    header('Location: tours.php');
     exit();
+}
+
+// Handle form submission
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    error_log("Form submitted: " . print_r($_POST, true));
+    try {
+        // Validate and sanitize input
+        $customer_name = filter_input(INPUT_POST, 'customer_name', FILTER_SANITIZE_STRING);
+        $customer_email = filter_input(INPUT_POST, 'customer_email', FILTER_VALIDATE_EMAIL);
+        $customer_phone = filter_input(INPUT_POST, 'customer_phone', FILTER_SANITIZE_STRING);
+        $booking_date = new DateTime($_POST['booking_date']);
+
+        if (!$customer_name || !$customer_email || !$customer_phone || !$booking_date) {
+            throw new Exception("Please fill in all required fields");
+        }
+
+        // Create new booking
+        $booking = new Booking(
+            null,
+            $tour['id'],
+            $customer_name,
+            $customer_email,
+            $customer_phone,
+            $booking_date
+        );
+
+        // Add booking
+        $bookingController->addBooking($booking);
+
+        // Store booking details in session for confirmation page
+        $_SESSION['booking_confirmation'] = [
+            'customer_name' => $customer_name,
+            'booking_date' => $booking_date->format('Y-m-d'),
+            'tour_id' => $tour['id']
+        ];
+
+        // Redirect to confirmation page
+        header('Location: booking-confirmation.php');
+        exit();
+
+    } catch (Exception $e) {
+        $error = $e->getMessage();
+    }
 }
 ?>
 
@@ -29,13 +75,14 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Book Tour - <?php echo htmlspecialchars($tour['name']); ?></title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --primary-color: #2563eb;
-            --secondary-color: #1e40af;
-            --error-color: #dc2626;
-            --success-color: #059669;
+            --primary-color: #D2B48C;
+            --secondary-color: #BC8F8F;
+            --accent-color: #DEB887;
+            --text-color: #5D4037;
+            --light-beige: #F5F5DC;
+            --white: #FFFFFF;
         }
 
         * {
@@ -46,142 +93,123 @@ try {
         }
 
         body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-            padding: 40px 20px;
+            background-color: var(--light-beige);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 2rem;
         }
 
         .container {
             max-width: 800px;
             margin: 0 auto;
-            background: white;
+            background: var(--white);
             padding: 2rem;
-            border-radius: 15px;
+            border-radius: 1rem;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .tour-header {
-            text-align: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid #e5e7eb;
         }
 
         .tour-details {
             margin-bottom: 2rem;
-            padding: 1rem;
-            background: #f8fafc;
-            border-radius: 10px;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
         }
 
         .form-group {
             margin-bottom: 1.5rem;
         }
 
-        .form-group label {
+        label {
             display: block;
             margin-bottom: 0.5rem;
             font-weight: 600;
-            color: #374151;
         }
 
-        .form-group input {
+        input {
             width: 100%;
-            padding: 0.75rem;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 0.5rem;
             font-size: 1rem;
-            transition: all 0.3s ease;
         }
 
-        .form-group input:focus {
-            border-color: var(--primary-color);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
-        }
-
-        .error-message {
-            color: var(--error-color);
-            font-size: 0.875rem;
-            margin-top: 0.25rem;
-            display: none;
-        }
-
-        input.error {
-            border-color: var(--error-color);
-        }
-
-        input.valid {
-            border-color: var(--success-color);
-        }
-
-        .btn-primary {
-            background: var(--primary-color);
-            color: white;
+        button {
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 1rem 2rem;
             border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
+            border-radius: 0.5rem;
             cursor: pointer;
+            font-size: 1.1rem;
             width: 100%;
-            transition: all 0.3s ease;
+            transition: background-color 0.3s ease;
         }
 
-        .btn-primary:hover {
-            background: var(--secondary-color);
-            transform: translateY(-2px);
+        button:hover {
+            background-color: var(--secondary-color);
         }
 
-        @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="tour-header">
-            <h1><?php echo htmlspecialchars($tour['name']); ?></h1>
-            <div class="price-tag"><?php echo htmlspecialchars($tour['price']); ?> DT</div>
-        </div>
-
+        <a href="tours.php" class="back-link">← Back to Tours</a>
+        
         <div class="tour-details">
-            <p><i class="fas fa-map-marker-alt"></i> Destination: <?php echo htmlspecialchars($tour['destination']); ?></p>
-            <p><i class="fas fa-clock"></i> Duration: <?php echo htmlspecialchars($tour['duration']); ?> days</p>
+            <h1>Book Tour: <?php echo htmlspecialchars($tour['name']); ?></h1>
+            <p><strong>Destination:</strong> <?php echo htmlspecialchars($tour['destination']); ?></p>
+            <p><strong>Duration:</strong> <?php echo htmlspecialchars($tour['duration']); ?> days</p>
+            <p><strong>Price:</strong> <?php echo htmlspecialchars($tour['price']); ?> DT</p>
         </div>
 
-        <form id="bookingForm" action="process-booking.php" method="POST" onsubmit="return validateForm(event)">
-            <input type="hidden" name="tour_id" value="<?php echo htmlspecialchars($tour['id']); ?>">
-            
+        <form method="POST" id="bookingForm" action="process-booking.php" onsubmit="return validateForm(event)">
+            <input type="hidden" name="tour_id" value="<?php echo (int)$_GET['tour_id']; ?>">
+
             <div class="form-group">
-                <label for="customer_name">Full Name</label>
-                <input type="text" id="customer_name" name="customer_name" oninput="validateInput(this, 'name')">
-                <span class="error-message" id="nameError"></span>
+                <label for="customer_name">Full Name *</label>
+                <input type="text" id="customer_name" name="customer_name">
             </div>
 
             <div class="form-group">
-                <label for="customer_email">Email</label>
-                <input type="email" id="customer_email" name="customer_email" oninput="validateInput(this, 'email')">
-                <span class="error-message" id="emailError"></span>
+                <label for="customer_email">Email *</label>
+                <input type="text" id="customer_email" name="customer_email">
             </div>
 
             <div class="form-group">
-                <label for="customer_phone">Phone Number</label>
-                <input type="tel" id="customer_phone" name="customer_phone" oninput="validateInput(this, 'phone')">
-                <span class="error-message" id="phoneError"></span>
+                <label for="customer_phone">Phone Number *</label>
+                <input type="text" id="customer_phone" name="customer_phone">
             </div>
 
             <div class="form-group">
-                <label for="booking_date">Booking Date</label>
-                <input type="date" id="booking_date" name="booking_date" oninput="validateInput(this, 'date')">
-                <span class="error-message" id="dateError"></span>
+                <label for="booking_date">Booking Date *</label>
+                <input type="date" id="booking_date" name="booking_date">
             </div>
 
-            <button type="submit" class="btn-primary">
-                <i class="fas fa-check"></i> Confirm Booking
-            </button>
+            <button type="submit">Book Now</button>
         </form>
     </div>
 
@@ -190,123 +218,71 @@ try {
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('booking_date').setAttribute('min', today);
 
-        function validateInput(input, type) {
-            input.classList.remove('error', 'valid');
-            const errorElement = document.getElementById(`${type}Error`);
-            errorElement.style.display = 'none';
-
-            switch(type) {
-                case 'name':
-                    if (input.value.length < 3) {
-                        showError(input, errorElement, 'Name must be at least 3 characters long');
-                        return false;
-                    }
-                    break;
-
-                case 'email':
-                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                    if (!emailRegex.test(input.value)) {
-                        showError(input, errorElement, 'Please enter a valid email address');
-                        return false;
-                    }
-                    break;
-
-                case 'phone':
-                    const phoneRegex = /^[0-9+\s-]{8,}$/;
-                    if (!phoneRegex.test(input.value)) {
-                        showError(input, errorElement, 'Please enter a valid phone number (minimum 8 digits)');
-                        return false;
-                    }
-                    break;
-
-                case 'date':
-                    const selectedDate = new Date(input.value);
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-
-                    if (!input.value) {
-                        showError(input, errorElement, 'Please select a date');
-                        return false;
-                    }
-                    if (selectedDate < today) {
-                        showError(input, errorElement, 'Please select a future date');
-                        return false;
-                    }
-                    break;
+        // Prevent non-numeric input for phone
+        document.getElementById('customer_phone').addEventListener('keypress', function(e) {
+            if (!/^\d*$/.test(e.key) || this.value.length >= 8) {
+                e.preventDefault();
             }
+        });
 
-            input.classList.add('valid');
-            return true;
-        }
+        // Prevent paste for phone number
+        document.getElementById('customer_phone').addEventListener('paste', function(e) {
+            e.preventDefault();
+        });
 
-        function showError(input, errorElement, message) {
-            input.classList.add('error');
-            errorElement.textContent = message;
-            errorElement.style.display = 'block';
-        }
+        // Prevent special characters in name
+        document.getElementById('customer_name').addEventListener('keypress', function(e) {
+            const char = String.fromCharCode(e.keyCode || e.which);
+            if (!/^[a-zA-Z\s]$/.test(char)) {
+                e.preventDefault();
+            }
+        });
 
         function validateForm(event) {
             event.preventDefault();
-            
-            const inputs = {
-                name: document.getElementById('customer_name'),
-                email: document.getElementById('customer_email'),
-                phone: document.getElementById('customer_phone'),
-                date: document.getElementById('booking_date')
-            };
 
-            let isValid = true;
-            for (const [type, input] of Object.entries(inputs)) {
-                if (!validateInput(input, type)) {
-                    isValid = false;
-                }
+            // Get form values
+            const name = document.getElementById('customer_name').value.trim();
+            const email = document.getElementById('customer_email').value.trim();
+            const phone = document.getElementById('customer_phone').value.trim();
+            const date = document.getElementById('booking_date').value;
+
+            // Name validation
+            if (name.length < 3) {
+                alert('Please enter a valid name (minimum 3 characters)');
+                return false;
             }
 
-            if (isValid) {
-                showSuccessMessage();
-                setTimeout(() => {
-                    document.getElementById('bookingForm').submit();
-                }, 1000);
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert('Please enter a valid email address');
+                return false;
+            }
+
+            // Phone validation
+            if (!/^\d{8}$/.test(phone)) {
+                alert('Please enter a valid 8-digit phone number');
+                return false;
+            }
+
+            // Date validation
+            const selectedDate = new Date(date);
+            const todayDate = new Date();
+            todayDate.setHours(0, 0, 0, 0);
+
+            if (!date || selectedDate < todayDate) {
+                alert('Please select a valid future date');
+                return false;
+            }
+
+            // If all validations pass
+            if (confirm('Are you sure you want to book this tour?')) {
+                document.getElementById('bookingForm').submit();
             }
 
             return false;
         }
-
-        function showSuccessMessage() {
-            const successMessage = document.createElement('div');
-            successMessage.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: var(--success-color);
-                color: white;
-                padding: 1rem 2rem;
-                border-radius: 8px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                animation: slideIn 0.5s ease-out;
-            `;
-            successMessage.textContent = 'Booking validation successful! Processing...';
-            document.body.appendChild(successMessage);
-
-            setTimeout(() => {
-                successMessage.style.animation = 'slideOut 0.5s ease-in';
-                setTimeout(() => successMessage.remove(), 500);
-            }, 2500);
-        }
-
-        // Add keyframe animations
-        document.head.insertAdjacentHTML('beforeend', `
-            <style>
-                @keyframes slideIn {
-                    from { transform: translateX(100%); opacity: 0; }
-                    to { transform: translateX(0); opacity: 1; }
-                }
-                @keyframes slideOut {
-                    from { transform: translateX(0); opacity: 1; }
-                    to { transform: translateX(100%); opacity: 0; }
-                }
-            </style>
-        `);
     </script>
 </body>
-</html> 
+</html>
