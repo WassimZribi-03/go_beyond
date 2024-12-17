@@ -1,32 +1,58 @@
 <?php
-include_once __DIR__ . '/../../../Controller/disponibilitecontroller.php';
-include_once '../../../Controller/guidecontroller.php';
-include_once '../../../Controller/guidecontroller.php';
+include '../../../controller/eventcontroller.php';
+
 
 $error = "";
 
-$disponibility = null;
-// create an instance of the DisponibilitesGuidesController
-$disponibilityC = new DisponibilitesGuidesController();
-$guideC = new GuideTouristiqueController();
-$guides = $guideC->listGuides();
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    
-   
-    
-        $disponibility = new Disponibility(null,  new DateTime($_POST['available_date']), // Convert available_date to DateTime
-        new DateTime($_POST['start_time']), // Convert start_time to DateTime
-        new DateTime($_POST['end_time']), // Convert end_time to DateTime
-        $_POST['id_guide'], // Guide ID
-        $_POST['status'] // Status
-        );
+$event = null;
+// Create an instance of the controller
+$eventC = new EventController(); // Corrected capitalization and variable name
 
-        // Update the availability
-        $disponibilityC->updateDisponibility($disponibility, $_POST['id']);
-        header("Location:disponibilitelist.php");
-   
+// Check if all required fields are set and not empty
+if (
+    isset($_POST["title"], $_POST["description"], $_POST["capacity"], $_POST["price"], $_POST["date_start"], $_POST["place"], $_POST["id"])
+) {
+    if (
+        !empty($_POST["title"]) &&
+        !empty($_POST["description"]) &&
+        !empty($_POST["capacity"]) &&
+        !empty($_POST["price"]) &&
+        !empty($_POST["date_start"]) && // Removed duplicate capacity check
+        !empty($_POST["id"]) &&
+        !empty($_POST["place"])
+    ) {
+        // Determine the availability status
+        
+
+        // Create a DateTime object for the start date
+        
+
+        // Create a new TravelOffer object with the attributes
+        $event = new Event (
+          null, // Assuming the ID is auto-incremented in the database
+          $_POST['title'], 
+          $_POST['description'], 
+          $_POST['date_start'], 
+          $_POST['place'], 
+          floatval($_POST['price']), // Convert to float
+          intval($_POST['capacity']) // Convert to integer
+      );
+      
+
+        // Add the offer using the controller
+        $eventC->addEvent($event); // Corrected method name to match EventController
+         
+        // Redirect to the offer list page
+        header('Location: listeevent.php');
+         // Corrected filename
+        exit; // Ensure no further code executes after the redirect
+    } else {
+        $error = "Missing information";
+    }
 }
 ?>
+
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -99,7 +125,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </li>
       </ul>
     </div>
-   
     
   </aside>
   <main class="main-content position-relative border-radius-lg ">
@@ -109,9 +134,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
             <li class="breadcrumb-item text-sm"><a class="opacity-5 text-white" href="javascript:;">Pages</a></li>
-            <li class="breadcrumb-item text-sm text-white active" aria-current="page">Guides</li>
+            <li class="breadcrumb-item text-sm text-white active" aria-current="page">events</li>
           </ol>
-          <h6 class="font-weight-bolder text-white mb-0">Guides</h6>
+          <h6 class="font-weight-bolder text-white mb-0">events</h6>
         </nav>
         <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
           <div class="ms-md-auto pe-md-3 d-flex align-items-center">
@@ -153,90 +178,87 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="card">
             <div class="card-header pb-0">
               <div class="d-flex align-items-center">
-                <p class="mb-0">Edit Guide</p>
+                <p class="mb-0">ajout event</p>
               
               </div>
             </div>
-            <?php
-    if (isset($_GET["id"])) {
-        $d =$disponibilityC->showDisponibility($_GET["id"]);
-       
-    ?>
-    <?php if ($d): ?>
-    <form method="POST" action="" id="editdispo">
-        <div class="card-body">
-            <p class="text-uppercase text-sm">Guide Availability</p>
-            <div class="col-md-12">
-                <div class="form-group">
-                    <label for="id_guide" class="form-control-label">Select Guide</label>
-                    <select class="form-control" name="id_guide" id="id_guide">
-    <option value="" disabled <?= empty($d['id_guide']) ? 'selected' : '' ?>>-- Select a Guide --</option>
-    <?php foreach ($guides as $guide): ?>
-        <option value="<?= htmlspecialchars($guide['id']) ?>" <?= isset($d['id_guide']) && $d['id_guide'] == $guide['id'] ? 'selected' : '' ?>>
-            <?= htmlspecialchars($guide['title']) ?>
-        </option>
-    <?php endforeach; ?>
-</select>
-
-                    <small class="text-danger" id="idGuideError"></small>
-                </div>
-            </div>
-            <div class="row">
-                <input class="form-control" type="hidden" name="id" value="<?php echo $d['id']; ?>">
-
-                <!-- Available Date -->
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label for="available_date">Available Date</label>
-                        <input class="form-control" type="date" name="available_date" id="available_date" value="<?php echo $d['available_date']; ?>"/>
-                        <small class="text-danger" id="availableDateError"></small>
-                    </div>
-                </div>
-
-                <!-- Start Time -->
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label for="start_time">Start Time</label>
-                        <input class="form-control" type="time" name="start_time" id="start_time" value="<?php echo $d['start_time']; ?>"/>
-                        <small class="text-danger" id="startTimeError"></small>
-                    </div>
-                </div>
-
-                <!-- End Time -->
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label for="end_time">End Time</label>
-                        <input class="form-control" type="time" name="end_time" id="end_time" value="<?php echo $d['end_time']; ?>"/>
-                        <small class="text-danger" id="endTimeError"></small>
-                    </div>
-                </div>
-
-                <!-- Status -->
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label for="status">Status</label>
-                        <select class="form-control" name="status" id="status">
-                            <option value="1" <?php echo ($d['status'] === 1) ? 'selected' : ''; ?>>Free</option>
-                            <option value="0" <?php echo ($d['status'] === 0) ? 'selected' : ''; ?>>Busy</option>
-                        </select>
-                        <small class="text-danger" id="statusError"></small>
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="row mt-4">
-                <div class="col-md-12 d-flex justify-content-between">
-                    <button type="button" class="btn btn-danger" onclick="history.back()">Cancel</button>
-                    <button type="submit" class="btn btn-success">Submit</button>
-                </div>
+    <form method="POST" >
+            <div class="card-body">
+               <p class="text-uppercase text-sm">event Information</p>
+    <div class="row">
+      
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="example-text-input" class="form-control-label">Title</label>
+                <input class="form-control" type="text" name="title">
             </div>
         </div>
+        <div class="col-md-6">
+    <div class="form-group">
+        <label for="example-text-input" class="form-control-label">Description</label>
+        <textarea class="form-control" rows="4" name="description"></textarea>
+    </div>
+</div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="example-text-input" class="form-control-label">capacity</label>
+                <input class="form-control" type="text" name="capacity" >
+            </div>
+        </div>
+    </div>
+    <hr class="horizontal dark">
+    <p class="text-uppercase text-sm">Publication Details</p>
+    <div class="row">
+       
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="example-text-input" class="form-control-label">price</label>
+                <input class="form-control" name="price" type="text" >
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="example-text-input" class="form-control-label">id</label>
+                <input class="form-control" name="id" type="text">
+            </div>
+        </div>
+       
+    </div>
+    <div class='row'>  <div class="col-md-4">
+            <div class="form-group">
+                <label for="example-text-input" class="form-control-label">place</label>
+                <input class="form-control" name="place" type="text" >
+            </div>
+        </div><div class="col-md-4">
+            <div class="form-group">
+                <label for="example-text-input" class="form-control-label">date_start</label>
+                <input class="form-control" name="date_start" type="text" >
+            </div>
+        </div>
+    <hr class="horizontal dark">
+    <p class="text-uppercase text-sm">Availability</p>
+    <div class="row">
+        <div class="col-md-6">
+        <div class="form-group">
+                                                    <div class="custom-control custom-checkbox small">
+                                                        <input type="checkbox" class="custom-control-input" id="customCheck" name="is_available" >
+                                                            </label>
+                                                    </div>
+                                                </div>
+        </div>
+    </div>
+</div>
+<div class="col-md-12">
+    <button type="submit" class="btn btn-primary">Save </button>
+</div>
+
+          </div>
+       
+        </div>
+      
+      </div>
     </form>
-    <?php else: ?>
-    <p>No avaibilty found for the given ID.</p>
-    <?php endif; ?>
-<?php } ?>
    
     </div>
   </main>
@@ -312,60 +334,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       </div>
     </div>
   </div>
-  <script>
-      document.getElementById('editdispo').addEventListener('submit', function (e) {
-      e.preventDefault(); // Prevent form submission
-
-        let isValid = true;
-
-        // Clear previous errors
-        const errorFields = document.querySelectorAll('.text-danger');
-        errorFields.forEach((error) => (error.textContent = ''));
-
-        // Get form values
-        const guide = document.getElementById('id_guide').value;
-        const availableDate = document.getElementById('available_date').value;
-        const startTime = document.getElementById('start_time').value;
-        const endTime = document.getElementById('end_time').value;
-
-        // Guide validation
-        if (!guide) {
-            document.getElementById('idGuideError').textContent = 'Please select a guide.';
-            isValid = false;
-        }
-
-        // Date validation
-        const today = new Date().toISOString().split('T')[0];
-        if (!availableDate) {
-            document.getElementById('availableDateError').textContent = 'Please select an available date.';
-            isValid = false;
-        } else if (availableDate < today) {
-            document.getElementById('availableDateError').textContent = 'The date must be today or later.';
-            isValid = false;
-        }
-
-        // Start time validation
-        if (!startTime) {
-            document.getElementById('startTimeError').textContent = 'Please enter a start time.';
-            isValid = false;
-        }
-
-        // End time validation
-        if (!endTime) {
-            document.getElementById('endTimeError').textContent = 'Please enter an end time.';
-            isValid = false;
-        } else if (startTime && endTime <= startTime) {
-            document.getElementById('endTimeError').textContent = 'End time must be after start time.';
-            isValid = false;
-        }
-
-        if (isValid) {
-        this.submit();
-    }
-     
-    });
-</script>
-
   <!--   Core JS Files   -->
   <script src="../assets/js/core/popper.min.js"></script>
   <script src="../assets/js/core/bootstrap.min.js"></script>
@@ -471,5 +439,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </body>
 
 </html>
-
-

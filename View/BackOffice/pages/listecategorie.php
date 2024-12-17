@@ -1,33 +1,8 @@
 <?php
-include_once __DIR__ . '/../../../Controller/disponibilitecontroller.php';
-include_once '../../../Controller/guidecontroller.php';
-include_once '../../../Controller/guidecontroller.php';
-
-$error = "";
-
-$disponibility = null;
-// create an instance of the DisponibilitesGuidesController
-$disponibilityC = new DisponibilitesGuidesController();
-$guideC = new GuideTouristiqueController();
-$guides = $guideC->listGuides();
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    
-   
-    
-        $disponibility = new Disponibility(null,  new DateTime($_POST['available_date']), // Convert available_date to DateTime
-        new DateTime($_POST['start_time']), // Convert start_time to DateTime
-        new DateTime($_POST['end_time']), // Convert end_time to DateTime
-        $_POST['id_guide'], // Guide ID
-        $_POST['status'] // Status
-        );
-
-        // Update the availability
-        $disponibilityC->updateDisponibility($disponibility, $_POST['id']);
-        header("Location:disponibilitelist.php");
-   
-}
+include __DIR__ . '/../../../controller/categoriecontroller.php';
+$categorieC = new CategorieventController();
+$list = $categorieC->listcategories();
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -57,12 +32,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
       <a class="navbar-brand m-0" href=" https://demos.creative-tim.com/argon-dashboard/pages/dashboard.html " target="_blank">
         <img src="../assets/img/logo-ct-dark.png" width="26px" height="26px" class="navbar-brand-img h-100" alt="main_logo">
-        <span class="ms-1 font-weight-bold">Go beyond</span>
+        <span class="ms-1 font-weight-bold">Go Beyond</span>
       </a>
     </div>
     <hr class="horizontal dark mt-0">
-   <!-- MENU -->
-   <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
+    <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
       <ul class="navbar-nav">
        
         <li class="nav-item">
@@ -99,8 +73,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </li>
       </ul>
     </div>
-   
-    
   </aside>
   <main class="main-content position-relative border-radius-lg ">
     <!-- Navbar -->
@@ -109,9 +81,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
             <li class="breadcrumb-item text-sm"><a class="opacity-5 text-white" href="javascript:;">Pages</a></li>
-            <li class="breadcrumb-item text-sm text-white active" aria-current="page">Guides</li>
+            <li class="breadcrumb-item text-sm text-white active" aria-current="page">Pages</li>
           </ol>
-          <h6 class="font-weight-bolder text-white mb-0">Guides</h6>
+          <h6 class="font-weight-bolder text-white mb-0">categorie</h6>
         </nav>
         <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
           <div class="ms-md-auto pe-md-3 d-flex align-items-center">
@@ -139,7 +111,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <li class="nav-item px-3 d-flex align-items-center">
               <a href="javascript:;" class="nav-link text-white p-0">
                 <i class="fa fa-cog fixed-plugin-button-nav cursor-pointer"></i>
-              </a>
+                </a>
             </li>
           
           </ul>
@@ -150,95 +122,61 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="container-fluid py-4">
       <div class="row">
         <div class="col-12">
-        <div class="card">
-            <div class="card-header pb-0">
-              <div class="d-flex align-items-center">
-                <p class="mb-0">Edit Guide</p>
-              
+          <div class="card mb-4">
+          <div class="card-header pb-0">
+            <div class="d-flex justify-content-between">
+                <p class="mb-0">categorie list</p>
+                <div class="text-end pe-3">
+                <a href="createcategorie.php" class="btn btn-primary btn-sm ">Add categorie</a>
               </div>
             </div>
-            <?php
-    if (isset($_GET["id"])) {
-        $d =$disponibilityC->showDisponibility($_GET["id"]);
-       
-    ?>
-    <?php if ($d): ?>
-    <form method="POST" action="" id="editdispo">
-        <div class="card-body">
-            <p class="text-uppercase text-sm">Guide Availability</p>
-            <div class="col-md-12">
-                <div class="form-group">
-                    <label for="id_guide" class="form-control-label">Select Guide</label>
-                    <select class="form-control" name="id_guide" id="id_guide">
-    <option value="" disabled <?= empty($d['id_guide']) ? 'selected' : '' ?>>-- Select a Guide --</option>
-    <?php foreach ($guides as $guide): ?>
-        <option value="<?= htmlspecialchars($guide['id']) ?>" <?= isset($d['id_guide']) && $d['id_guide'] == $guide['id'] ? 'selected' : '' ?>>
-            <?= htmlspecialchars($guide['title']) ?>
-        </option>
-    <?php endforeach; ?>
-</select>
+            <div class="card-body px-0 pt-0 pb-2">
+              <div class="table-responsive p-0">
+                <table class="table  mb-0">
+                  <thead>
+                    <tr>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">id_categ</th>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">categorie</th>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">disponibilite</th>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">organisateur</th>
+                      <th class="text-secondary opacity-7"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                  <?php
+foreach ($list as $categorie) {
+?> 
+<tr>   
+    <td class="align-middle text-center text-sm"><?= $categorie['id_categ']; ?></td>
+    <td class="align-middle text-sm"><?= $categorie['categorie']; ?></td>
+    <td class="align-middle text-sm"><?= $categorie['disponibilite']; ?></td>
+    <td class="align-middle text-sm"><?= $categorie['organisateur']; ?></td>
+    
 
-                    <small class="text-danger" id="idGuideError"></small>
-                </div>
+    <td class="align-middle">
+        <a href="editcategorie.php?id=<?php echo $categorie['id_categ']; ?>" class="text-primary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">
+            Edit
+        </a>
+        <a href="deletecategorie.php?id=<?php echo $categorie['id_categ']; ?>" class="text-danger font-weight-bold text-xs ms-2" data-toggle="tooltip" data-original-title="Delete user">
+            Delete
+        </a>
+    </td>
+</tr>
+<?php
+}
+?>
+
+                  </tbody>
+                </table>
+              </div>
             </div>
-            <div class="row">
-                <input class="form-control" type="hidden" name="id" value="<?php echo $d['id']; ?>">
-
-                <!-- Available Date -->
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label for="available_date">Available Date</label>
-                        <input class="form-control" type="date" name="available_date" id="available_date" value="<?php echo $d['available_date']; ?>"/>
-                        <small class="text-danger" id="availableDateError"></small>
-                    </div>
-                </div>
-
-                <!-- Start Time -->
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label for="start_time">Start Time</label>
-                        <input class="form-control" type="time" name="start_time" id="start_time" value="<?php echo $d['start_time']; ?>"/>
-                        <small class="text-danger" id="startTimeError"></small>
-                    </div>
-                </div>
-
-                <!-- End Time -->
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label for="end_time">End Time</label>
-                        <input class="form-control" type="time" name="end_time" id="end_time" value="<?php echo $d['end_time']; ?>"/>
-                        <small class="text-danger" id="endTimeError"></small>
-                    </div>
-                </div>
-
-                <!-- Status -->
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label for="status">Status</label>
-                        <select class="form-control" name="status" id="status">
-                            <option value="1" <?php echo ($d['status'] === 1) ? 'selected' : ''; ?>>Free</option>
-                            <option value="0" <?php echo ($d['status'] === 0) ? 'selected' : ''; ?>>Busy</option>
-                        </select>
-                        <small class="text-danger" id="statusError"></small>
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="row mt-4">
-                <div class="col-md-12 d-flex justify-content-between">
-                    <button type="button" class="btn btn-danger" onclick="history.back()">Cancel</button>
-                    <button type="submit" class="btn btn-success">Submit</button>
-                </div>
-            </div>
+          </div>
         </div>
-    </form>
-    <?php else: ?>
-    <p>No avaibilty found for the given ID.</p>
-    <?php endif; ?>
-<?php } ?>
+      </div>
    
-    </div>
+   
+    </div>  
+                      
   </main>
   <div class="fixed-plugin">
     <a class="fixed-plugin-button text-dark position-fixed px-3 py-2">
@@ -312,149 +250,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       </div>
     </div>
   </div>
-  <script>
-      document.getElementById('editdispo').addEventListener('submit', function (e) {
-      e.preventDefault(); // Prevent form submission
-
-        let isValid = true;
-
-        // Clear previous errors
-        const errorFields = document.querySelectorAll('.text-danger');
-        errorFields.forEach((error) => (error.textContent = ''));
-
-        // Get form values
-        const guide = document.getElementById('id_guide').value;
-        const availableDate = document.getElementById('available_date').value;
-        const startTime = document.getElementById('start_time').value;
-        const endTime = document.getElementById('end_time').value;
-
-        // Guide validation
-        if (!guide) {
-            document.getElementById('idGuideError').textContent = 'Please select a guide.';
-            isValid = false;
-        }
-
-        // Date validation
-        const today = new Date().toISOString().split('T')[0];
-        if (!availableDate) {
-            document.getElementById('availableDateError').textContent = 'Please select an available date.';
-            isValid = false;
-        } else if (availableDate < today) {
-            document.getElementById('availableDateError').textContent = 'The date must be today or later.';
-            isValid = false;
-        }
-
-        // Start time validation
-        if (!startTime) {
-            document.getElementById('startTimeError').textContent = 'Please enter a start time.';
-            isValid = false;
-        }
-
-        // End time validation
-        if (!endTime) {
-            document.getElementById('endTimeError').textContent = 'Please enter an end time.';
-            isValid = false;
-        } else if (startTime && endTime <= startTime) {
-            document.getElementById('endTimeError').textContent = 'End time must be after start time.';
-            isValid = false;
-        }
-
-        if (isValid) {
-        this.submit();
-    }
-     
-    });
-</script>
-
   <!--   Core JS Files   -->
   <script src="../assets/js/core/popper.min.js"></script>
   <script src="../assets/js/core/bootstrap.min.js"></script>
   <script src="../assets/js/plugins/perfect-scrollbar.min.js"></script>
   <script src="../assets/js/plugins/smooth-scrollbar.min.js"></script>
-  <script src="../assets/js/plugins/chartjs.min.js"></script>
-  <script>
-    var ctx1 = document.getElementById("chart-line").getContext("2d");
-
-    var gradientStroke1 = ctx1.createLinearGradient(0, 230, 0, 50);
-
-    gradientStroke1.addColorStop(1, 'rgba(94, 114, 228, 0.2)');
-    gradientStroke1.addColorStop(0.2, 'rgba(94, 114, 228, 0.0)');
-    gradientStroke1.addColorStop(0, 'rgba(94, 114, 228, 0)');
-    new Chart(ctx1, {
-      type: "line",
-      data: {
-        labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-        datasets: [{
-          label: "Mobile apps",
-          tension: 0.4,
-          borderWidth: 0,
-          pointRadius: 0,
-          borderColor: "#5e72e4",
-          backgroundColor: gradientStroke1,
-          borderWidth: 3,
-          fill: true,
-          data: [50, 40, 300, 220, 500, 250, 400, 230, 500],
-          maxBarThickness: 6
-
-        }],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: false,
-          }
-        },
-        interaction: {
-          intersect: false,
-          mode: 'index',
-        },
-        scales: {
-          y: {
-            grid: {
-              drawBorder: false,
-              display: true,
-              drawOnChartArea: true,
-              drawTicks: false,
-              borderDash: [5, 5]
-            },
-            ticks: {
-              display: true,
-              padding: 10,
-              color: '#fbfbfb',
-              font: {
-                size: 11,
-                family: "Open Sans",
-                style: 'normal',
-                lineHeight: 2
-              },
-            }
-          },
-          x: {
-            grid: {
-              drawBorder: false,
-              display: false,
-              drawOnChartArea: false,
-              drawTicks: false,
-              borderDash: [5, 5]
-            },
-            ticks: {
-              display: true,
-              color: '#ccc',
-              padding: 20,
-              font: {
-                size: 11,
-                family: "Open Sans",
-                style: 'normal',
-                lineHeight: 2
-              },
-            }
-          },
-        },
-      },
-    });
-  </script>
   <script>
     var win = navigator.platform.indexOf('Win') > -1;
     if (win && document.querySelector('#sidenav-scrollbar')) {
@@ -471,5 +271,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </body>
 
 </html>
-
-

@@ -86,10 +86,10 @@ if (
     </div>
     <hr class="horizontal dark mt-0">
    <!-- MENU -->
-    <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
+   <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
       <ul class="navbar-nav">
-        
-      <li class="nav-item">
+       
+        <li class="nav-item">
           <a class="nav-link " href="../pages/guideList.php">
             <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
               <i class="ni ni-circle-08 text-dark text-sm opacity-10"></i>
@@ -105,10 +105,24 @@ if (
             <span class="nav-link-text ms-1">Disponibilites Guides</span>
           </a>
         </li>
-       
+        <li class="nav-item">
+          <a class="nav-link " href="../pages/listeevent.php">
+            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="ni ni-calendar-grid-58 text-dark text-sm opacity-10"></i>
+            </div>
+            <span class="nav-link-text ms-1">Events</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link " href="../pages/listecategorie.php">
+            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="ni ni-calendar-grid-58 text-dark text-sm opacity-10"></i>
+            </div>
+            <span class="nav-link-text ms-1">Events Categories</span>
+          </a>
+        </li>
       </ul>
     </div>
-   
     
   </aside>
   <main class="main-content position-relative border-radius-lg ">
