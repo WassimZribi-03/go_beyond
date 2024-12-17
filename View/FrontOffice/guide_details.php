@@ -156,7 +156,7 @@ if (isset($_GET["id"])) {
 
                 <!-- Right Column (Guide Details & Booking Form) -->
                 
-                    <div class="right-content">
+                    <div class="right-content col-md-6">
                         <h4><?php echo htmlspecialchars($guide['title']); ?></h4>
                         <span><?php echo htmlspecialchars($guide['description']); ?></span>
                         
