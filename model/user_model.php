@@ -8,17 +8,18 @@ class User{
     private $Email;
     private $Password;
     private $Role;
+    private $Blocked;
 
 
-    public function __construct($userID = null, $firstName = null, $lastName = null, $email = null, $password = null, $role = 'User') {
+    public function __construct($userID = null, $firstName = null, $lastName = null, $email = null, $password = null, $role = 'User' , $blocked = 'no'){
         $this->userID = $userID;
         $this->firstName = $firstName;
         $this->lastName = $lastName;
         $this->email = $email;
         $this->password = $password;
         $this->role = $role;
+        $this->blocked==$blocked ;
     }
-
 
 
 
@@ -73,7 +74,14 @@ class User{
         public function setRole($Role) {
             $this->Role = $Role;
         }
+        
+        public function getBlocked(){
+            return $this->Blocked;
+        }
 
+        public function setBlocked($Blocked){
+            $this->Blocked = $Blocked;
+        }
 
     }
 ?>

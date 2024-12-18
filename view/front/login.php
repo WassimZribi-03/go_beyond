@@ -2,17 +2,19 @@
 require_once '../../controller/user_controller.php';  // Include the user controller
 
 $controller = new UserController(); // Create an instance of the controller
+$errorMessage = ""; // Initialize error message variable
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['email']) && isset($_POST['password'])) {
         $email = $_POST['email'];
         $password = $_POST['password'];
-        $loginSuccess = $controller->login($email, $password);
+        $loginResult = $controller->login($email, $password); // Capture the login result
         
-        if (!$loginSuccess) {
-            $errorMessage = "Invalid email or password."; // Store error message
+        if ($loginResult !== true) { // Check if login was successful
+            $errorMessage = $loginResult; // Store the error message
         } else {
             // Optionally handle successful login here if needed
+            // Redirect or perform actions after successful login
         }
     }
 }

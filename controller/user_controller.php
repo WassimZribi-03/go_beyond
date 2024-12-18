@@ -23,10 +23,13 @@ class UserController {
         $response = "";
 
         foreach ($users as $user) {
+            $userBlocked = $user['Blocked'] === 'yes';
             $response .= "<div class='member'>";
             $response .= "-Name: " . htmlspecialchars($user['FirstName']) . " " . htmlspecialchars($user['LastName']) . " , ";
             $response .= "Email: " . htmlspecialchars($user['Email']) . " ";
-            $response .= "<button class='btn-delete' onclick=\"deleteUser('" . htmlspecialchars($user['Email']) . "')\">Delete</button>";
+            $response .= "<button class='toggle-button " . ($userBlocked ? 'active' : '') . "' onclick=\"toggleUserBlock('" . htmlspecialchars($user['Email']) . "', " . ($userBlocked ? 'false' : 'true') . ")\">";
+            $response .= $userBlocked ? 'Unblock' : 'Block';
+            $response .= "</button>";
             $response .= "</div>";
         }
 
@@ -37,15 +40,27 @@ class UserController {
         echo $response;
     }
 
-    public function deleteUser($email) {
+    public function unblockUser($email) {
         $conn = config::getConnexion();
-        $sql = "DELETE FROM users WHERE Email = :email";
+        $sql = "UPDATE users SET Blocked = 'NO' WHERE Email = :email";
         try {
             $query = $conn->prepare($sql);
             $query->execute([':email' => $email]);
-            echo json_encode(['status' => 'success', 'message' => 'User deleted successfully.']);
+            echo json_encode(['status' => 'success', 'message' => 'User unblocked successfully.']);
         } catch (Exception $e) {
-            echo json_encode(['status' => 'error', 'message' => 'Error deleting user: ' . $e->getMessage()]);
+            echo json_encode(['status' => 'error', 'message' => 'Error unblocking user: ' . $e->getMessage()]);
+        }
+    }
+
+    public function blockUser($email) {
+        $conn = config::getConnexion();
+        $sql = "UPDATE users SET Blocked = 'yes' WHERE Email = :email";
+        try {
+            $query = $conn->prepare($sql);
+            $query->execute([':email' => $email]);
+            echo json_encode(['status' => 'success', 'message' => 'User blocked successfully.']);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => 'Error blocking user: ' . $e->getMessage()]);
         }
     }
 
@@ -60,7 +75,7 @@ class UserController {
                 ':firstName' => $user->getFirstName(),
                 ':lastName' => $user->getLastName(),
                 ':email' => $user->getEmail(),
-                ':password' => $user->getPassword(),
+                ':password' => password_hash($user->getPassword(), PASSWORD_DEFAULT),
                 ':role' => $user->getRole()
             ]);
         } catch (Exception $e) {
@@ -79,17 +94,34 @@ class UserController {
             die('Error: ' . $e->getMessage());
         }
     }
-
     public function searchUsersByEmail() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $keyword = htmlspecialchars($_POST['keyword']);
             $users = $this->getUsersByEmail($keyword);
-            include 'C:/xampp/htdocs/koll_chy_jdid/view/back/admin_home.php';
+            $response = "";
+    
+            foreach ($users as $user) {
+                $userBlocked = $user['Blocked'] === 'yes';
+                $response .= "<div class='member'>";
+                $response .= "-Name: " . htmlspecialchars($user['FirstName']) . " " . htmlspecialchars($user['LastName']) . " , ";
+                $response .= "Email: " . htmlspecialchars($user['Email']) . " ";
+                $response .= "<button class='toggle-button " . ($userBlocked ? 'active' : '') . "' onclick=\"toggleUserBlock('" . htmlspecialchars($user['Email']) . "', " . ($userBlocked ? 'false' : 'true') . ")\">";
+                $response .= $userBlocked ? 'Unblock' : 'Block';
+                $response .= "</button>";
+                $response .= "</div>";
+            }
+    
+            if (empty($response)) {
+                $response = "<p>No members found.</p>";
+            }
+    
+            echo $response;
         } else {
             die('Invalid request method.');
         }
     }
 
+    
     public function updateUser($id, $user) {
         $conn = config::getConnexion();
         $sql = "UPDATE users SET FirstName = :firstName, LastName = :lastName, Email = :email, 
@@ -102,7 +134,7 @@ class UserController {
                 ':firstName' => $user->getFirstName(),
                 ':lastName' => $user->getLastName(),
                 ':email' => $user->getEmail(),
-                ':password' => $user->getPassword(),
+                ':password' => password_hash($user->getPassword(), PASSWORD_DEFAULT),
                 ':role' => $user->getRole()
             ]);
         } catch (Exception $e) {
@@ -130,6 +162,12 @@ class UserController {
         $user = $this->getUserByEmail($email); 
 
         if ($user) {
+            // Check if the user is blocked first
+            if ($user['Blocked'] === 'yes') {
+                return 'This user is suspended.';
+            }
+
+            // Now verify the password
             if (password_verify($password, $user['Password'])) {
                 session_start();
                 $_SESSION['userID'] = $user['UserID']; 
@@ -150,13 +188,16 @@ class UserController {
     }
 }
 
-if (isset($_GET['action']) && $_GET['action'] === 'fetchMembers') {
-    $controller = new UserController();
-    $controller->fetchMembers();
-}
 
-if (isset($_POST['action']) && $_POST['action'] === 'deleteUser') {
-    $email = $_POST['email'];
+// Handle requests
+if (isset($_GET['action'])) {
     $controller = new UserController();
-    $controller->deleteUser($email);
+    if ($_GET['action'] === 'fetchMembers') {
+        $controller->fetchMembers();
+    } elseif ($_GET['action'] === 'blockUser' && isset($_GET['email'])) {
+        $controller->blockUser($_GET['email']);
+    } elseif ($_GET['action'] === 'unblockUser' && isset($_GET['email'])) {
+        $controller->unblockUser($_GET['email']);
+    }
 }
+?>

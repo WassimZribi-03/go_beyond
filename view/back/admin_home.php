@@ -6,10 +6,48 @@
     <title>Admin Home</title>
     <link rel="stylesheet" href="admin_home.css">
 </head>
+<style>
+    .toggle-button {
+        background-color:rgb(28, 27, 106); /* Primary color */
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        cursor: pointer;
+        border-radius: 5px;
+        font-size: 12px;
+        font-weight: bold;
+        transition: background-color 0.3s, transform 0.2s;
+        box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
+    }
+
+    .toggle-button:hover {
+        background-color: #0056b3; /* Darker shade on hover */
+        transform: translateY(-2px);
+    }
+
+    .toggle-button.active {
+        background-color: #dc3545; /* Danger color */
+    }
+
+    .toggle-button.active:hover {
+        background-color: #c82333; /* Darker shade for active button on hover */
+    }
+
+    /* Additional styles for other elements */
+    .header {
+        /* Your header styles */
+    }
+
+    .container {
+        /* Your container styles */
+    }
+0
+    /* Add more styles as needed */
+</style>
 <body>
 <div class="header">
     <div class="profile">
-        <div class="profile-pic"><img src="logo75.png" alt=""></div>
+        <div class="profile-pic"><img src="mogo150.png" alt=""></div>
         <div class="profile-text">
             <span class="name">Admin</span>
             <span class="title">edit</span>
@@ -17,8 +55,10 @@
     </div>
     <div class="nav">
         <div class="search-container">
-            <input type="text" class="search-bar" placeholder="Search by email...">
+        <form action="" method="post">
+            <input type="text" class="search-bar" placeholder="Search by email... "  onkeyup="searchUsers()">
             <button class="search-button">Search</button>
+</form>
         </div>
         <div class="nav-item">edit profile</div>
         <div class="nav-item">Settings</div>
@@ -94,24 +134,22 @@
         }
     }
 
-    function deleteUser(email) {
-        console.log("Deleting user with email:", email);
-        if (confirm(`Are you sure you want to delete the user with email: ${email}?`)) {
-            fetch('../../controller/user_controller.php?action=deleteUser', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: new URLSearchParams({ email: email })
+    function blockUser(email) {
+        if (confirm("Are you sure you want to block this user?")) {
+            fetch('../../controller/user_controller.php?action=blockUser&email=' + encodeURIComponent(email), {
+                method: 'POST'
             })
-            // mochkla lhneee !!!!! 
             .then(response => response.json())
             .then(data => {
-                alert(data.message);
-                fetchAndDisplayMembers();
+                if (data.status === 'success') {
+                    alert(data.message);
+                    fetchAndDisplayMembers(); // Refresh the user list
+                } else {
+                    alert(data.message);
+                }
             })
             .catch(error => {
-                console.error('Error deleting user:', error);
+                console.error('Error:', error);
             });
         }
     }
@@ -139,6 +177,45 @@
     function generateAddForm(type) {
         // Add form generation logic here based on type
     }
+
+
+    function toggleUserBlock(email, isBlocked) {
+    const action = isBlocked ? 'blockUser' : 'unblockUser';
+    fetch('../../controller/user_controller.php?action=' + action + '&email=' + encodeURIComponent(email), {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert(data.message);
+            fetchAndDisplayMembers();
+        } else {
+            alert(data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+function searchUsers() {
+    const keyword = document.querySelector('.search-bar').value;
+
+    fetch('../../controller/user_controller.php?action=searchUsersByEmail', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'keyword=' + encodeURIComponent(keyword)
+    })
+    .then(response => response.text())
+    .then(data => {
+        document.getElementById('list-members').innerHTML = data;
+    })
+    .catch(error => {
+        console.error('Error fetching search results:', error);
+    });
+}
 </script>
 
 </body>
