@@ -4,47 +4,17 @@ include(__DIR__ . '/../Model/guide.php');
 
 class GuideTouristiqueController
 {
-    public function listGuides($searchName = '', $searchLanguage = '', $searchRegion = '')
-{
-   
-    $sql = "SELECT * FROM guide WHERE 1";
-
-    $bindParams = [];
-
-  
-    if (!empty($searchName)) {
-        $sql .= " AND LOWER(title) LIKE :searchName";
-        $bindParams[':searchName'] = '%' . strtolower($searchName) . '%';
-    }
-
-    if (!empty($searchLanguage)) {
-        $sql .= " AND LOWER(language) LIKE :searchLanguage";
-        $bindParams[':searchLanguage'] = '%' . strtolower($searchLanguage) . '%';
-    }
-
-    if (!empty($searchRegion)) {
-        $sql .= " AND LOWER(region) LIKE :searchRegion";
-        $bindParams[':searchRegion'] = '%' . strtolower($searchRegion) . '%';
-    }
-
-   
-    $db = config::getConnexion();
-    try {
-        $stmt = $db->prepare($sql);
-        
-      
-        foreach ($bindParams as $param => $value) {
-            $stmt->bindValue($param, $value);
+    public function listGuides()
+    {
+        $sql = "SELECT * FROM guide ";
+        $db = config::getConnexion();
+        try {
+            $liste = $db->query($sql);
+            return $liste;
+        } catch (Exception $e) {
+            die('Error:' . $e->getMessage());
         }
-
-        $stmt->execute();
-        
-       
-        return $stmt->fetchAll();
-    } catch (Exception $e) {
-        die('Error: ' . $e->getMessage());
     }
-}
 
     function deleteGuide($id)
     {
