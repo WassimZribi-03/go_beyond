@@ -194,9 +194,9 @@ if (isset($_GET["id"])) {
                                     <input type="hidden" name="guide_id" value="<?php echo htmlspecialchars($_GET['id']); ?>">
 
                                     <!-- Submit Button -->
-                                    <div class="main-dark-button text-center" style="padding: 12px 20px; background-color: #333; color: #fff; border-radius: 5px; cursor: pointer; font-weight: bold;" type="submit">
-                                        Book Now
-                                    </div>
+                                    <button type="submit" class="main-dark-button text-center" style="width: 100%; padding: 12px 20px; background-color: #333; color: #fff; border-radius: 5px; cursor: pointer; font-weight: bold; border: none;">
+    Book Now
+</button>
                                 </div>
                             </form>
                         </div>
