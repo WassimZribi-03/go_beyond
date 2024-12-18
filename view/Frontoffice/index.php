@@ -1,6 +1,6 @@
 <?php
 include __DIR__ . '/../../controller/eventcontroller.php';
-include(__DIR__ . '/../../Controller/guidecontroller.php');
+include(__DIR__ . '/../../controller/guidecontroller.php');
 $eventController = new EventController();
 $events = $eventController->listEvents();
 

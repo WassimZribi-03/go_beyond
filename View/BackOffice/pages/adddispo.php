@@ -1,32 +1,56 @@
 <?php
+
 include_once __DIR__ . '/../../../Controller/disponibilitecontroller.php';
 include_once '../../../Controller/guidecontroller.php';
-include_once '../../../Controller/guidecontroller.php';
+
+
+
+$dispoC = new DisponibilitesGuidesController();
+
+
+$guideC = new GuideTouristiqueController();
+$guides = $guideC->listGuides();
 
 $error = "";
 
-$disponibility = null;
-// create an instance of the DisponibilitesGuidesController
-$disponibilityC = new DisponibilitesGuidesController();
-$guideC = new GuideTouristiqueController();
-$guides = $guideC->listGuides();
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    
-   
-    
-        $disponibility = new Disponibility(null,  new DateTime($_POST['available_date']), // Convert available_date to DateTime
-        new DateTime($_POST['start_time']), // Convert start_time to DateTime
-        new DateTime($_POST['end_time']), // Convert end_time to DateTime
-        $_POST['id_guide'], // Guide ID
-        $_POST['status'] // Status
-        );
+// Initialiser l'objet disponibilité
+$availability = null;
 
-        // Update the availability
-        $disponibilityC->updateDisponibility($disponibility, $_POST['id']);
-        header("Location:disponibilitelist.php");
-   
+// Vérifier si tous les champs requis sont définis et non vides
+if (
+    isset($_POST["id_guide"], $_POST["available_date"], $_POST["start_time"], $_POST["end_time"], $_POST["status"])
+) {
+    if (
+        !empty($_POST["id_guide"]) &&
+        !empty($_POST["available_date"]) &&
+        !empty($_POST["start_time"]) &&
+        !empty($_POST["end_time"]) &&
+        !empty($_POST["status"])
+    ) {
+        // Créer un nouvel objet Disponibilite avec les attributs
+
+        $availability = new Disponibility(
+          null, // Auto-increment ID
+          new DateTime($_POST['available_date']), // Convert available_date to DateTime
+          new DateTime($_POST['start_time']), // Convert start_time to DateTime
+          new DateTime($_POST['end_time']), // Convert end_time to DateTime
+          $_POST['id_guide'], // Guide ID
+          $_POST['status'] // Status
+      );
+        // Ajouter la disponibilité à l'aide du contrôleur
+        $dispoC->addDisponibility($availability);
+
+        // Rediriger vers la liste des disponibilités
+        header('Location:disponibilitelist.php');
+        exit; // S'assurer qu'aucun autre code ne s'exécute après la redirection
+    } else {
+        $error = "Informations manquantes";
+    }
 }
+
 ?>
+
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -99,7 +123,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </li>
       </ul>
     </div>
-   
     
   </aside>
   <main class="main-content position-relative border-radius-lg ">
@@ -153,90 +176,74 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="card">
             <div class="card-header pb-0">
               <div class="d-flex align-items-center">
-                <p class="mb-0">Edit Guide</p>
+                <p class="mb-0">Add Disponibilite</p>
               
               </div>
             </div>
-            <?php
-    if (isset($_GET["id"])) {
-        $d =$disponibilityC->showDisponibility($_GET["id"]);
-       
-    ?>
-    <?php if ($d): ?>
-    <form method="POST" action="" id="editdispo">
-        <div class="card-body">
-            <p class="text-uppercase text-sm">Guide Availability</p>
-            <div class="col-md-12">
+            <form method="POST" action="" id="addDispo">
+    <div class="card-body">
+        <p class="text-uppercase text-sm">Guide Information</p>
+        <div class="row">
+            <div class="col-md-6">
                 <div class="form-group">
                     <label for="id_guide" class="form-control-label">Select Guide</label>
                     <select class="form-control" name="id_guide" id="id_guide">
-    <option value="" disabled <?= empty($d['id_guide']) ? 'selected' : '' ?>>-- Select a Guide --</option>
-    <?php foreach ($guides as $guide): ?>
-        <option value="<?= htmlspecialchars($guide['id']) ?>" <?= isset($d['id_guide']) && $d['id_guide'] == $guide['id'] ? 'selected' : '' ?>>
-            <?= htmlspecialchars($guide['title']) ?>
-        </option>
-    <?php endforeach; ?>
-</select>
-
+                        <option value="" disabled selected>-- Select a Guide --</option>
+                        <?php foreach ($guides as $guide): ?>
+                            <option value="<?= htmlspecialchars($guide['id']) ?>">
+                                <?= htmlspecialchars($guide['title']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
                     <small class="text-danger" id="idGuideError"></small>
                 </div>
             </div>
-            <div class="row">
-                <input class="form-control" type="hidden" name="id" value="<?php echo $d['id']; ?>">
-
-                <!-- Available Date -->
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label for="available_date">Available Date</label>
-                        <input class="form-control" type="date" name="available_date" id="available_date" value="<?php echo $d['available_date']; ?>"/>
-                        <small class="text-danger" id="availableDateError"></small>
-                    </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="available_date" class="form-control-label">Available Date</label>
+                    <input class="form-control" type="date" name="available_date" id="available_date">
+                    <small class="text-danger" id="availableDateError"></small>
                 </div>
-
-                <!-- Start Time -->
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label for="start_time">Start Time</label>
-                        <input class="form-control" type="time" name="start_time" id="start_time" value="<?php echo $d['start_time']; ?>"/>
-                        <small class="text-danger" id="startTimeError"></small>
-                    </div>
-                </div>
-
-                <!-- End Time -->
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label for="end_time">End Time</label>
-                        <input class="form-control" type="time" name="end_time" id="end_time" value="<?php echo $d['end_time']; ?>"/>
-                        <small class="text-danger" id="endTimeError"></small>
-                    </div>
-                </div>
-
-                <!-- Status -->
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label for="status">Status</label>
-                        <select class="form-control" name="status" id="status">
-                            <option value="1" <?php echo ($d['status'] === 1) ? 'selected' : ''; ?>>Free</option>
-                            <option value="0" <?php echo ($d['status'] === 0) ? 'selected' : ''; ?>>Busy</option>
-                        </select>
-                        <small class="text-danger" id="statusError"></small>
-                    </div>
-                </div>
-
             </div>
-
-            <div class="row mt-4">
-                <div class="col-md-12 d-flex justify-content-between">
-                    <button type="button" class="btn btn-danger" onclick="history.back()">Cancel</button>
-                    <button type="submit" class="btn btn-success">Submit</button>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="start_time" class="form-control-label">Start Time</label>
+                    <input class="form-control" type="time" name="start_time" id="start_time">
+                    <small class="text-danger" id="startTimeError"></small>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="end_time" class="form-control-label">End Time</label>
+                    <input class="form-control" type="time" name="end_time" id="end_time">
+                    <small class="text-danger" id="endTimeError"></small>
                 </div>
             </div>
         </div>
-    </form>
-    <?php else: ?>
-    <p>No avaibilty found for the given ID.</p>
-    <?php endif; ?>
-<?php } ?>
+
+        <hr class="horizontal dark">
+        <p class="text-uppercase text-sm">Status</p>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="status" class="form-control-label">Status</label>
+                    <select class="form-control" name="status" id="status">
+                        <option value="Free">Free</option>
+                        <option value="Busy">Busy</option>
+                    </select>
+                    <small class="text-danger" id="statusError"></small>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-12 d-flex justify-content-between">
+                <button type="button" class="btn btn-danger" onclick="history.back()">Cancel</button>
+                <button type="submit" class="btn btn-success">Submit</button>
+            </div>
+        </div>
+    </div>
+</form>
    
     </div>
   </main>
@@ -313,7 +320,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </div>
   </div>
   <script>
-      document.getElementById('editdispo').addEventListener('submit', function (e) {
+      document.getElementById('addDispo').addEventListener('submit', function (e) {
       e.preventDefault(); // Prevent form submission
 
         let isValid = true;
@@ -471,5 +478,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </body>
 
 </html>
-
-

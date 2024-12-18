@@ -92,5 +92,21 @@ class DisponibilitesGuidesController
             die('Error: ' . $e->getMessage());
         }
     }
+
+
+    public function listDisponibilitiesByGuide($id_guide)
+    {
+        $sql = "SELECT * FROM disponibilites_guides WHERE id_guide = :id_guide  AND status = 1 ";
+        $db = config::getConnexion();
+        try {
+            $query = $db->prepare($sql);
+            $query->bindValue(':id_guide', $id_guide, PDO::PARAM_INT);
+            $query->execute();
+
+            return $query->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            die('Error: ' . $e->getMessage());
+        }
+    }
 }
 ?>
