@@ -219,3 +219,54 @@ footer {
     opacity: 0;
     visibility: hidden;
 } 
+
+.main-nav {
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 15px 0;
+    margin-bottom: 30px;
+}
+
+.nav-links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+}
+
+.nav-links a {
+    color: #1e1e1e;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 16px;
+    padding: 10px 20px;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+}
+
+.nav-links a:hover {
+    background-color: #f8f9fa;
+    color: #ff565b;
+}
+
+.nav-links a.active {
+    background-color: #ff565b;
+    color: #fff;
+}
+
+.nav-links i {
+    margin-right: 8px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .nav-links {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .nav-links a {
+        width: 100%;
+        text-align: center;
+    }
+} 

@@ -298,5 +298,24 @@ class TourController
             return 0;
         }
     }
+
+    // Get featured tours
+    public function getFeaturedTours($limit = 3)
+    {
+        try {
+            $query = $this->db->prepare("
+                SELECT * FROM tours 
+                WHERE is_featured = 1 
+                ORDER BY created_at DESC 
+                LIMIT :limit
+            ");
+            $query->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $query->execute();
+            return $query->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error getting featured tours: " . $e->getMessage());
+            return [];
+        }
+    }
 }
 ?>

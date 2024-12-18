@@ -1,3 +1,31 @@
+    <!-- *** Subscribe *** -->
+    <div class="subscribe">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4">
+                    <h4>Subscribe Our Newsletter:</h4>
+                </div>
+                <div class="col-lg-8">
+                    <form id="subscribe" action="" method="get">
+                        <div class="row">
+                          <div class="col-lg-9">
+                            <fieldset>
+                              <input name="email" type="text" id="email" pattern="[^ @]*@[^ @]*" placeholder="Your Email Address" required="">
+                            </fieldset>
+                          </div>
+                          <div class="col-lg-3">
+                            <fieldset>
+                              <button type="submit" id="form-submit" class="main-dark-button">Submit</button>
+                            </fieldset>
+                          </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- *** Footer *** -->
     <footer>
         <div class="container">
             <div class="row">
@@ -12,9 +40,9 @@
                             <div class="col-lg-6">
                                 <div class="menu">
                                     <ul>
-                                        <li><a href="tours.php">Tours</a></li>
-                                        <li><a href="my-bookings.php">My Bookings</a></li>
-                                        <li><a href="#">Contact</a></li>
+                                        <li><a href="/accomodation/Views/Frontoffice/tours.php">Tours</a></li>
+                                        <li><a href="/accomodation/Views/Frontoffice/my-bookings.php">My Bookings</a></li>
+                                        <li><a href="/accomodation/Views/Frontoffice/shows-events.php">Events</a></li>
                                     </ul>
                                 </div>
                             </div>
@@ -39,10 +67,11 @@
         </div>
     </footer>
 
-    <!-- Template Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.2/umd/popper.min.js"></script>
+    <!-- Core Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
-    <script src="https://unpkg.com/scrollreveal"></script>
+    <script src="https://unpkg.com/scrollreveal@4.0.9/dist/scrollreveal.min.js"></script>
     <script src="/accomodation/assets/js/custom.js"></script>
 </body>
 </html> 
