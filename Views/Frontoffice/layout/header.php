@@ -400,15 +400,17 @@
 
                         <!-- Menu -->
                         <ul class="nav">
-                            <li><a href="/accomodation/Views/Frontoffice/index.php" <?php echo ($currentPage == 'home') ? 'class="active"' : ''; ?>>Home</a></li>
-                            <li><a href="/go_beyond-event/view/Frontoffice/shows-events.php">Events</a></li>
-                            <li><a href="/go_beyond-event/view/Frontoffice/my-event-bookings.php">Event Bookings</a></li>
-                            <li><a href="/accomodation/Views/Frontoffice/tours.php">Tours</a></li>
-                            <li><a href="/accomodation/Views/Frontoffice/my-bookings.php">Tour Bookings</a></li>
+                            <li><a href="/accomodation/Views/Frontoffice/index.php" <?php echo $currentPage == 'home' ? 'class="active"' : ''; ?>>Home</a></li>
+                            <li><a href="/accomodation/Views/Frontoffice/tours.php" <?php echo $currentPage == 'tours' ? 'class="active"' : ''; ?>>Tours</a></li>
+                            <li><a href="/go_beyond-guide/View/FrontOffice/guides.php" <?php echo $currentPage == 'guides' ? 'class="active"' : ''; ?>>Our Guides</a></li>
+                            <li><a href="/accomodation/Views/Frontoffice/my-bookings.php" <?php echo $currentPage == 'my-bookings' ? 'class="active"' : ''; ?>>My Bookings</a></li>
+                            <li><a href="/go_beyond-event/view/Frontoffice/shows-events.php" class="<?php echo ($currentPage == 'events') ? 'active' : ''; ?>">Events</a></li>
+                            <li><a href="/go_beyond-event/view/Frontoffice/my-event-bookings.php" class="<?php echo ($currentPage == 'event-bookings') ? 'active' : ''; ?>">My Event Bookings</a></li>
                             <?php if (isset($_SESSION['user_id'])): ?>
-                                <li><a href="/accomodation/logout.php">Logout</a></li>
+                                <li><a href="/go_beyond-guide/View/FrontOffice/my-guide-bookings.php" class="<?php echo ($currentPage == 'guide-bookings') ? 'active' : ''; ?>">Guide Bookings</a></li>
+                                <li><a href="/accomodation/Views/Frontoffice/logout.php">Logout</a></li>
                             <?php else: ?>
-                                <li><a href="/accomodation/login.php">Login</a></li>
+                                <li><a href="/accomodation/Views/Frontoffice/login.php">Login</a></li>
                             <?php endif; ?>
                         </ul>
                         <a class='menu-trigger'><span>Menu</span></a>

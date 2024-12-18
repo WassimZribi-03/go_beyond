@@ -41,8 +41,11 @@
                                 <div class="menu">
                                     <ul>
                                         <li><a href="/accomodation/Views/Frontoffice/tours.php">Tours</a></li>
-                                        <li><a href="/accomodation/Views/Frontoffice/my-bookings.php">My Bookings</a></li>
-                                        <li><a href="/accomodation/Views/Frontoffice/shows-events.php">Events</a></li>
+                                        <li><a href="/accomodation/Views/Frontoffice/my-bookings.php">My Tour Bookings</a></li>
+                                        <li><a href="/go_beyond-event/view/Frontoffice/shows-events.php">Events</a></li>
+                                        <li><a href="/go_beyond-event/view/Frontoffice/my-event-bookings.php">Event Bookings</a></li>
+                                        <li><a href="/go_beyond-guide/View/FrontOffice/pages/guides.php">Guides</a></li>
+                                        <li><a href="/go_beyond-guide/View/FrontOffice/pages/my-guide-bookings.php">Guide Bookings</a></li>
                                     </ul>
                                 </div>
                             </div>
